@@ -47,6 +47,7 @@ namespace Editor.Shortcuts
 			}
 
 			selectedMenus = null;
+			selectedObjects = null;
 		}
 
 		[Shortcut(NAMESPACE + "Menu/QuickSearch", KeyCode.Period, ShortcutModifiers.Control)]
@@ -59,6 +60,7 @@ namespace Editor.Shortcuts
 				.Where(m => m != null && Menu.GetEnabled(m.path))
 				.Where(m => MenuProxy.MenuItemExists(m.path))
 
+				// Remove open windows toolbar thingy
 				.Where(m => m.path.StartsWith("Window/Panel") == false)
 				.OrderBy(m => m.path)
 				.ThenBy(m => m.priority);

@@ -7,7 +7,7 @@ using UnityEditor;
 using System;
 using System.Linq;
 
-namespace Editor
+namespace Editor.Shortcuts
 {
 	public static class ProjectBrowserNavigatorShortcut
 	{

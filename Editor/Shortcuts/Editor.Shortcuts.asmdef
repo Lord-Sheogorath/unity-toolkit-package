@@ -1,6 +1,6 @@
 {
-    "name": "Editor.Shortcuts.MenuQuickSearch",
-    "rootNamespace": "Editor",
+    "name": "Editor.Shortcuts",
+    "rootNamespace": "Editor.Shortcuts",
     "references": [
         "GUID:459b18c3d2949bf4bbc84d53f9280c40"
     ],

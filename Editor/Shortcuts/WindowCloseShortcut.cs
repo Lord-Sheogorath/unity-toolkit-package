@@ -24,7 +24,7 @@ namespace Editor.Shortcuts
 				return;
 			}
 
-			var confirmed = EditorUtility.DisplayDialog($"Close WIndow - {window.titleContent}", "Are you sure?", "Confirm", "Cancel");
+			var confirmed = EditorUtility.DisplayDialog($"Close WIndow", $"Are you sure you want to close '{window.titleContent}'?", "Confirm", "Cancel");
 
 			if (confirmed == false)
 			{

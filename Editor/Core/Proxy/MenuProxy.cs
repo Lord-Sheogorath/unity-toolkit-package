@@ -2,12 +2,15 @@
 using UnityEditor;
 using System.Reflection;
 using System;
+using Sirenix.OdinInspector;
+using System.Collections.Generic;
 
-namespace Editor
+namespace LordSheo.Editor
 {
 	public static class MenuProxy
 	{
 		public static MethodInfo getMenuItemsMethod;
+		public static MethodInfo getMenuItemDefaultShortcutsMethod;
 
 		public static MethodInfo removeMenuItemMethod;
 		public static MethodInfo addMenuItemMethod;
@@ -20,6 +23,9 @@ namespace Editor
 
 			getMenuItemsMethod = type
 				.FindMethodInfo_Static("GetMenuItems");
+
+			getMenuItemDefaultShortcutsMethod = type
+				.FindMethodInfo_Static("GetMenuItemDefaultShortcuts");
 
 			removeMenuItemMethod = type
 				.FindMethodInfo_Static("RemoveMenuItem");
@@ -45,6 +51,11 @@ namespace Editor
 			}
 
 			return menus;
+		}
+
+		public static void GetMenuItemDefaultShortcuts(List<string> outItemNames, List<string> outItemDefaultShortcuts)
+		{
+			getMenuItemDefaultShortcutsMethod.Invoke(null, new object[] { outItemNames, outItemDefaultShortcuts });
 		}
 
 		public static void RemoveMenuItem(string menuItem)

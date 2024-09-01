@@ -1,0 +1,12 @@
+{
+  "name": "com.lord-sheo.editor.tools",
+  "displayName": "QoL Editor Tools",
+  "version": "0.0.1",
+  "description": "Collection of handy editor QoL add-ons and tools.",
+  "author": {
+    "name": "LordSheo"
+  },
+  "contributors": [],
+  "keywords": [],
+  "dependencies": {}
+}

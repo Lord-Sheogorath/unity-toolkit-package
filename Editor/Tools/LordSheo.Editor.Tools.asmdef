@@ -1,0 +1,16 @@
+{
+    "name": "LordSheo.Editor.Tools",
+    "rootNamespace": "LordSheo.Editor.Tools",
+    "references": [
+        "GUID:459b18c3d2949bf4bbc84d53f9280c40"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

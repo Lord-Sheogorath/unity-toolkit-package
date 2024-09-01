@@ -3,7 +3,7 @@ using UnityEditor.ShortcutManagement;
 using UnityEditor;
 using System;
 
-namespace Editor.Shortcuts
+namespace LordSheo.Editor.Shortcuts
 {
 	public static class WindowCloseShortcut
 	{
@@ -14,7 +14,7 @@ namespace Editor.Shortcuts
 		public static string title;
 		public static EditorWindow parent;
 
-		[Shortcut(NAMESPACE + "Window/Close", KeyCode.W, ShortcutModifiers.Control)]
+		[Shortcut(ConstValues.NAMESPACE_PATH + "Window/Close", KeyCode.W, ShortcutModifiers.Control)]
 		public static void OnShortcut()
 		{
 			var window = EditorWindow.focusedWindow;

@@ -7,7 +7,7 @@ using UnityEditor;
 using System;
 using System.Linq;
 
-namespace Editor.Shortcuts
+namespace LordSheo.Editor.Shortcuts
 {
 	public static class ProjectBrowserNavigatorShortcut
 	{
@@ -31,7 +31,7 @@ namespace Editor.Shortcuts
 		public static void Initialise()
 		{
 			var folderStacksJson = UnityEditor.SessionState.GetString(SESSION_PREFS_KEY, null);
-			folderStacks = JsonConvert.DeserializeObject<FolderStacksCollection>(folderStacksJson);
+			folderStacks = JsonConvert.DeserializeObject<FolderStacksCollection>(folderStacksJson) ?? new();
 
 			EditorApplication.update -= OnUpdate_Safe;
 			EditorApplication.update += OnUpdate_Safe;
@@ -154,13 +154,13 @@ namespace Editor.Shortcuts
 			ProjectBrowserProxy.SetFolderSelection(browser, new int[] { lastFolderInstanceId });
 		}
 
-		[Shortcut(NAMESPACE + "Backward", KeyCode.Mouse3)]
+		[Shortcut(ConstValues.NAMESPACE_PATH + "Backward", KeyCode.Mouse3)]
 		public static void OnShortcut_Backward()
 		{
 			UpdateCurrentFolderStack(1);
 		}
 
-		[Shortcut(NAMESPACE + "Forward", KeyCode.Mouse4)]
+		[Shortcut(ConstValues.NAMESPACE_PATH + "Forward", KeyCode.Mouse4)]
 		public static void OnShortcut_Forward()
 		{
 			UpdateCurrentFolderStack(-1);

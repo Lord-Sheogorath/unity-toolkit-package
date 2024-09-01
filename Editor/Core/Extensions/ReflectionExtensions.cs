@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace Editor
+namespace LordSheo.Editor
 {
 	public static class ReflectionExtensions
 	{
@@ -60,14 +60,14 @@ namespace Editor
 			return ReflectionUtility.FindMethodInfo(type, type, name, args, flags);
 		}
 
-		public static MethodInfo FindMethodInfo(this object obj, string name, Type[] args = null)
+		public static MethodInfo FindMethodInfo(this object obj, string name, params Type[] args)
 		{
 			var type = obj.GetType();
 
 			return ReflectionUtility.FindMethodInfo(type, type, name, args, INSTANCE_FLAGS);
 		}
 
-		public static MethodInfo FindMethodInfo_Static(this Type type, string name, Type[] args)
+		public static MethodInfo FindMethodInfo_Static(this Type type, string name, params Type[] args)
 		{
 			return ReflectionUtility.FindMethodInfo(type, type, name, args, STATIC_FLAGS);
 		}
@@ -76,7 +76,7 @@ namespace Editor
 			return ReflectionUtility.FindMethodInfo(type, type, name, STATIC_FLAGS);
 		}
 
-		public static MethodInfo FindMethodInfo_Instance(this Type type, string name, Type[] args)
+		public static MethodInfo FindMethodInfo_Instance(this Type type, string name, params Type[] args)
 		{
 			return ReflectionUtility.FindMethodInfo(type, type, name, args, INSTANCE_FLAGS);
 		}

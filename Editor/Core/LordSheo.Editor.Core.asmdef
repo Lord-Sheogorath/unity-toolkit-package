@@ -1,0 +1,14 @@
+{
+    "name": "LordSheo.Editor.Core",
+    "rootNamespace": "LordSheo.Editor.Core",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

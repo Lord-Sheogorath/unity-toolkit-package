@@ -3,7 +3,7 @@ using System.Reflection;
 using System;
 using UnityEngine;
 
-namespace Editor
+namespace LordSheo.Editor
 {
 	public class ScriptingMenuItemProxy
 	{

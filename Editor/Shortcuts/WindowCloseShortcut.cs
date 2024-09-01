@@ -15,7 +15,7 @@ namespace Editor.Shortcuts
 		public static EditorWindow parent;
 
 		[Shortcut(NAMESPACE + "Window/Close", KeyCode.W, ShortcutModifiers.Control)]
-		public static void Show()
+		public static void OnShortcut()
 		{
 			var window = EditorWindow.focusedWindow;
 

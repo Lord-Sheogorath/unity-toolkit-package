@@ -22,9 +22,9 @@ namespace Editor
 		{
 			type = Type.GetType("UnityEditor.ScriptingMenuItem, UnityEditor.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
 
-			pathProperty = type.GetProperty("path");
-			isSeparatorProperty = type.GetProperty("isSeparator");
-			priorityProperty = type.GetProperty("priority");
+			pathProperty = type.FindPropertyInfo_Instance("path");
+			isSeparatorProperty = type.FindPropertyInfo_Instance("isSeparator");
+			priorityProperty = type.FindPropertyInfo_Instance("priority");
 		}
 
 		public ScriptingMenuItemProxy(object item)

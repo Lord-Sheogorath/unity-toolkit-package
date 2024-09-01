@@ -51,7 +51,7 @@ namespace Editor.Shortcuts
 		}
 
 		[Shortcut(NAMESPACE + "Menu/QuickSearch", KeyCode.Period, ShortcutModifiers.Control)]
-		public static void Show()
+		public static void OnShortcut()
 		{
 			selectedObjects = Selection.objects;
 

@@ -19,16 +19,16 @@ namespace Editor
 			var type = typeof(Menu);
 
 			getMenuItemsMethod = type
-				.GetMethod("GetMenuItems", BindingFlags.NonPublic | BindingFlags.Static);
+				.FindMethodInfo_Static("GetMenuItems");
 
 			removeMenuItemMethod = type
-				.GetMethod("RemoveMenuItem", BindingFlags.NonPublic | BindingFlags.Static);
+				.FindMethodInfo_Static("RemoveMenuItem");
 
 			addMenuItemMethod = type
-				.GetMethod("AddMenuItem", BindingFlags.NonPublic | BindingFlags.Static);
+				.FindMethodInfo_Static("AddMenuItem");
 
 			menuItemExistsMethod = type
-				.GetMethod("MenuItemExists", BindingFlags.NonPublic | BindingFlags.Static);
+				.FindMethodInfo_Static("MenuItemExists");
 		}
 
 		public static ScriptingMenuItemProxy[] GetMenuItems(string menuPath, bool includeSeparators, bool localized)

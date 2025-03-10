@@ -21,6 +21,8 @@ namespace LordSheo.Editor
 		public readonly static string[] cachedMenuItems;
 		public readonly static string[] cachedMenuRoots;
 
+		public readonly static Dictionary<string, string> cachedMenuShortcuts = new();
+
 		static MenuProxy()
 		{
 			var type = typeof(Menu);
@@ -43,7 +45,15 @@ namespace LordSheo.Editor
 			try
 			{
 				var menus = new List<string>();
-				GetMenuItemDefaultShortcuts(menus, new());
+				var shortcuts = new List<string>();
+
+				GetMenuItemDefaultShortcuts(menus, shortcuts);
+
+				for (int i = 0; i < menus.Count; i++)
+				{
+					// NOTE: Only add if valid?
+					cachedMenuShortcuts[menus[i]] = shortcuts[i];
+				}
 
 				cachedMenuItems = menus.ToArray();
 				cachedMenuRoots = cachedMenuItems

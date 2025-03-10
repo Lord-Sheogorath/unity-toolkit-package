@@ -51,10 +51,11 @@ namespace LordSheo.Editor.Shortcuts
 			selectedObjects = Selection.objects;
 
 			// NOTE: Can cache this
-			var menus = Settings.menuNames 
+			var menus = MenuProxy.cachedMenuRoots
 				.SelectMany(m => MenuProxy.GetMenuItems(m, true, true))
 				.Where(m => m != null && Menu.GetEnabled(m.path))
 				.Where(m => MenuProxy.MenuItemExists(m.path))
+				.Where(m => Settings.IsValid(m))
 
 				// NOTE: Remove open windows toolbar thingy
 				.Where(m => m.path.StartsWith("Window/Panel") == false)

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 
 namespace LordSheo.Editor.Shortcuts
@@ -14,16 +15,12 @@ namespace LordSheo.Editor.Shortcuts
 		}
 		public static MenuQuickSearchSettings Instance => EditorSettings.GetSettings<MenuQuickSearchSettings>(new DefaultSettings());
 
-		public List<string> menuNames = new List<string>()
+		public List<string> ignoredMenuNames = new List<string>();
+
+		public bool IsValid(ScriptingMenuItemProxy item)
 		{
-			"Assets",
-			"Component",
-			"Edit",
-			"File",
-			"GameObject",
-			"Tools",
-			"Window"
-		};
+			return ignoredMenuNames.Any(n => item.path.StartsWith(n)) == false;
+		}
 
 		[SettingsProvider]
 		private static SettingsProvider GetSettings()

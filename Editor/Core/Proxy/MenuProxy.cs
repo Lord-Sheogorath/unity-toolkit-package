@@ -4,6 +4,7 @@ using System.Reflection;
 using System;
 using Sirenix.OdinInspector;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace LordSheo.Editor
 {
@@ -16,6 +17,9 @@ namespace LordSheo.Editor
 		public static MethodInfo addMenuItemMethod;
 
 		public static MethodInfo menuItemExistsMethod;
+
+		public readonly static string[] cachedMenuItems;
+		public readonly static string[] cachedMenuRoots;
 
 		static MenuProxy()
 		{
@@ -35,6 +39,25 @@ namespace LordSheo.Editor
 
 			menuItemExistsMethod = type
 				.FindMethodInfo_Static("MenuItemExists");
+
+			try
+			{
+				var menus = new List<string>();
+				GetMenuItemDefaultShortcuts(menus, new());
+
+				cachedMenuItems = menus.ToArray();
+				cachedMenuRoots = cachedMenuItems
+					.Select(i => i.Split("/", StringSplitOptions.RemoveEmptyEntries))
+					.Select(s => s.FirstOrDefault())
+					.Where(n => string.IsNullOrEmpty(n) == false)
+					.Distinct()
+					.ToArray();
+
+			}
+			catch (System.Exception e)
+			{
+				Debug.LogException(e);
+			}
 		}
 
 		public static ScriptingMenuItemProxy[] GetMenuItems(string menuPath, bool includeSeparators, bool localized)

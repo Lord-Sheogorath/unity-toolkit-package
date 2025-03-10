@@ -126,6 +126,9 @@ namespace LordSheo.Editor.UI
 		[NonSerialized, ShowInInspector, PropertyOrder(-1)]
 		public SearchMode searchMode = SearchMode.Fuzzy;
 
+		[NonSerialized]
+		public bool isValidSearchTerm = true;
+
 		public string SearchTerm => SelectionTree.Config.SearchTerm;
 
 		public BetterGenericSelector(string title, bool multiSelect, IEnumerable<GenericSelectorItem<T>> collection)
@@ -242,6 +245,7 @@ namespace LordSheo.Editor.UI
 		public void FlushSearch()
 		{
 			cachedSearchInfo.Clear();
+			isValidSearchTerm = true;
 		}
 
 		public bool DefaultSearch(OdinMenuItem item)
@@ -308,6 +312,12 @@ namespace LordSheo.Editor.UI
 		}
 		protected bool MatchesRegexSearch(OdinMenuItem item, string input, out int score)
 		{
+			if (isValidSearchTerm == false)
+			{
+				score = 0;
+				return false;
+			}
+
 			try
 			{
 				score = 0;
@@ -318,6 +328,7 @@ namespace LordSheo.Editor.UI
 				Debug.LogException(e);
 
 				score = 0;
+				isValidSearchTerm = false;
 				return false;
 			}
 		}

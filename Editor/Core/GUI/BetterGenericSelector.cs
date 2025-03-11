@@ -308,6 +308,12 @@ namespace LordSheo.Editor.UI
 
 		protected bool MatchesFuzzySearch(OdinMenuItem item, string input, out int score)
 		{
+			if (input.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+			{
+				score = 1;
+				return true;
+			}
+
 			return FuzzySearch.Contains(SearchTerm, input, out score);
 		}
 		protected bool MatchesRegexSearch(OdinMenuItem item, string input, out int score)

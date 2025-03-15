@@ -62,7 +62,14 @@ namespace LordSheo.Editor.Windows
 		}
 		public void OnGUI(Rect rect)
 		{
-			DragAndDropUtilities.DragZone<UnityEngine.Object>(rect, asset, true, true);
+			if (EventHandler.IsKeyDown(KeyCode.LeftControl))
+			{
+				var color = Color.cyan;
+				color.a = 0.25f;
+
+				EditorGUI.DrawRect(rect, color);
+				DragAndDropUtilities.DragZone<UnityEngine.Object>(rect, asset, true, true);
+			}
 
 			if (rect.Contains(Event.current.mousePosition) == false)
 			{
@@ -98,6 +105,8 @@ namespace LordSheo.Editor.Windows
 
 		protected override void OnImGUI()
 		{
+			EventHandler.Update(Event.current);
+
 			MenuWidth = position.width;
 
 			base.OnImGUI();
@@ -165,18 +174,23 @@ namespace LordSheo.Editor.Windows
 
 			tree.AddMenuItemAtPath(parent, item);
 
-			if (node.value.IsValid())
-			{
-				item.Icon = node.value.Icon;
-			}
-			else
-			{
-				item.Icon = EditorIcons.AlertCircle.Active;
-			}
+			item.IconGetter = GetItemIcon;
 
 			OnAddNode(node, item);
 
 			return path;
+
+			Texture GetItemIcon()
+			{
+				if (node.value.IsValid())
+				{
+					return node.value.Icon;
+				}
+				else
+				{
+					return EditorIcons.AlertCircle.Active;
+				}
+			}
 		}
 
 		private void OnAddNode(Node<ITreeStyleProjectValue> node, OdinMenuItem item)
@@ -187,10 +201,11 @@ namespace LordSheo.Editor.Windows
 		private void OnDrawMenuItem(OdinMenuItem item)
 		{
 			var node = item.Value as Node<ITreeStyleProjectValue>;
-			node.value.OnGUI(item.LabelRect);
+
+			node.value.OnGUI(item.Rect);
 
 			if (IsSearching == false)
-			{
+			{ 
 				DragAndDropUtilities.DragZone(item.Rect, node, true, true);
 
 				HandleAssetDropZone(node, item.Rect);
@@ -198,6 +213,7 @@ namespace LordSheo.Editor.Windows
 			}
 
 			HandleMenuItemMiddleClick(item, node);
+
 		}
 
 		private void HandleMenuItemMiddleClick(OdinMenuItem item, Node<ITreeStyleProjectValue> node)

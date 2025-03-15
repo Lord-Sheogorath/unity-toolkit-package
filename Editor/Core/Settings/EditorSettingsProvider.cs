@@ -11,6 +11,7 @@ namespace LordSheo.Editor
 	public class EditorSettingsProvider<T> : SettingsProvider, IDisposable
 	{
 		public PropertyTree<T> tree;
+		public bool isDirty = false;
 
 		public readonly IDefaultEditorSettings<T> defaults;
 
@@ -40,13 +41,13 @@ namespace LordSheo.Editor
 		{
 			Dispose();
 
-			tree = new(new T[] { Settings });//
+			tree = new(new T[] { Settings });
 			tree.OnPropertyValueChanged += OnPropertyValueChanged;
 		}
 
 		protected virtual void OnPropertyValueChanged(InspectorProperty prop, int index)
 		{
-			//EditorSettings.SetSettings(Settings);
+			isDirty = true;
 		}
 
 		public override void OnDeactivate()
@@ -59,7 +60,24 @@ namespace LordSheo.Editor
 		public override void OnTitleBarGUI()
 		{
 			base.OnTitleBarGUI();
+			DrawToolbar();
+		}
 
+		public override void OnGUI(string searchContext)
+		{
+			base.OnGUI(searchContext);
+
+			tree.Draw(false);
+
+			if (isDirty)
+			{
+				EditorSettings.SetSettings(Settings);
+				isDirty = false;
+			}
+		}
+
+		private void DrawToolbar()
+		{
 			if (SirenixEditorGUI.ToolbarButton("Import"))
 			{
 				var confirm = EditorUtility.DisplayDialog("Import Settings?", "", "Confirm", "Cancel");
@@ -85,13 +103,6 @@ namespace LordSheo.Editor
 					Refresh();
 				}
 			}
-		}
-
-		public override void OnGUI(string searchContext)
-		{
-			base.OnGUI(searchContext);
-
-			tree.Draw(false);
 		}
 
 		public void Dispose()

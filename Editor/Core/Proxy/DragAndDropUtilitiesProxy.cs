@@ -19,20 +19,26 @@ namespace LordSheo.Editor
 				.FindFieldInfo_Static("draggingObjects");
 		}
 
-		public static IEnumerable<object> GetDraggingObjects()
+		public static IEnumerable<object> GetCombinedDraggedObject()
 		{
 			// NOTE: Need to do this so we can combine the
 			// UnityEngine.Object dragging list and raw
 			// dragging list provided by Odin.
-			var refs = DragAndDrop.objectReferences.Cast<object>();
-
-			var objects = (object[])draggingObjectsField.GetValue(null);
-
-			return refs.Concat(objects);
+			return DragAndDrop.objectReferences
+				.Cast<object>()
+				.Concat(GetDraggedObjects());
 		}
+		/// <summary>
+		/// Only returns non-UnityEngine.Object dragged objects
+		/// </summary>
+		public static object[] GetDraggedObjects()
+		{
+			return (object[])draggingObjectsField.GetValue(null);
+		}
+
 		public static T[] DropZone<T>(Rect rect)
 		{
-			var draggingObjects = GetDraggingObjects();
+			var draggingObjects = GetCombinedDraggedObject();
 
 			var dropped = DragAndDropUtilities.DropZone<T>(rect, default, false);
 

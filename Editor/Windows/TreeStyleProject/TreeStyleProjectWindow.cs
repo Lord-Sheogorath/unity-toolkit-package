@@ -3,97 +3,16 @@ using System.Collections;
 using System.Linq;
 using Newtonsoft.Json;
 using Sirenix.OdinInspector.Editor;
+using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
 
-namespace LordSheo.Editor.Windows
+namespace LordSheo.Editor.Windows.TSP
 {
-	public interface ITreeStyleProjectValue
-	{
-		string Name { get; }
-		Texture Icon { get; }
-
-		bool IsValid();
-		void Refresh();
-		void Select();
-		void OnGUI(Rect rect);
-	}
-
-	public class TSP_AssetValue : ITreeStyleProjectValue
-	{
-		public string guid;
-		public string name;
-
-		[JsonIgnore]
-		public UnityEngine.Object asset;
-
-		[JsonIgnore]
-		public string Name => IsValid() ? name : guid;
-
-		[JsonIgnore]
-		public Texture Icon { get; set; }
-
-		[JsonIgnore]
-		public OdinMenuItem Item { get; set; }
-
-		public bool IsValid()
-		{
-			return string.IsNullOrEmpty(guid) == false 
-				&& asset != null;
-		}
-		public void Refresh()
-		{
-			if (IsValid() == false)
-			{
-				asset = null;
-				Icon = null;
-			}
-
-			var path = AssetDatabase.GUIDToAssetPath(guid);
-
-			name = path.Split("/").LastOrDefault();
-			asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(path);
-
-			Icon = AssetDatabase.GetCachedIcon(path);
-		}
-		public void Select()
-		{
-		}
-		public void OnGUI(Rect rect)
-		{
-			if (EventHandler.IsKeyDown(KeyCode.LeftControl))
-			{
-				var color = Color.cyan;
-				color.a = 0.25f;
-
-				EditorGUI.DrawRect(rect, color);
-				DragAndDropUtilities.DragZone<UnityEngine.Object>(rect, asset, true, true);
-			}
-
-			if (rect.Contains(Event.current.mousePosition) == false)
-			{
-				return;
-			}
-
-			if (Event.current.clickCount == 1)
-			{
-				Selection.activeObject = asset;
-				EditorGUIUtility.PingObject(asset);
-			}
-			else if (Event.current.clickCount == 2)
-			{
-				if (TreeStyleProjectSettings.Instance.enableEditWithDoubleClick)
-				{
-					AssetDatabase.OpenAsset(asset);
-				}
-			}
-		}
-	}
-
 	public class TreeStyleProjectWindow : OdinMenuEditorWindow
 	{
-		public NodeGraph<ITreeStyleProjectValue> graph = new();
+		public NodeGraph<IValue> graph = new();
 
 		public bool IsSearching => string.IsNullOrEmpty(MenuTree.Config.SearchTerm) == false;
 
@@ -121,8 +40,15 @@ namespace LordSheo.Editor.Windows
 
 			foreach (var child in graph.children)
 			{
-				var parent = Add(tree, child, "");
-				AddChildren(tree, child, parent);
+				try
+				{
+					var parent = Add(tree, child, "");
+					AddChildren(tree, child, parent);
+				}
+				catch (Exception e)
+				{
+					Debug.LogException(e);
+				}
 			}
 
 			return tree;
@@ -133,7 +59,7 @@ namespace LordSheo.Editor.Windows
 			if (type == SelectionChangedType.ItemAdded)
 			{
 				var nodes = MenuTree.Selection.SelectedValues
-					.OfType<Node<ITreeStyleProjectValue>>()
+					.OfType<Node<IValue>>()
 					.Select(n => n.value);
 
 				foreach (var value in nodes)
@@ -143,7 +69,7 @@ namespace LordSheo.Editor.Windows
 			}
 		}
 
-		private void AddChildren(OdinMenuTree tree, Node<ITreeStyleProjectValue> root, string parent)
+		private void AddChildren(OdinMenuTree tree, Node<IValue> root, string parent)
 		{
 			foreach (var node in root.children)
 			{
@@ -152,8 +78,10 @@ namespace LordSheo.Editor.Windows
 				AddChildren(tree, node, name);
 			}
 		}
-		private string Add(OdinMenuTree tree, Node<ITreeStyleProjectValue> node, string parent)
+		private string Add(OdinMenuTree tree, Node<IValue> node, string parent)
 		{
+			Debug.Log("NODE: " + JsonConvert.SerializeObject(node));
+
 			node.value.Refresh();
 
 			var name = "[Missing] " + node.value.Name;
@@ -193,14 +121,14 @@ namespace LordSheo.Editor.Windows
 			}
 		}
 
-		private void OnAddNode(Node<ITreeStyleProjectValue> node, OdinMenuItem item)
+		private void OnAddNode(Node<IValue> node, OdinMenuItem item)
 		{
 			item.OnDrawItem += OnDrawMenuItem;
 		}
 
 		private void OnDrawMenuItem(OdinMenuItem item)
 		{
-			var node = item.Value as Node<ITreeStyleProjectValue>;
+			var node = item.Value as Node<IValue>;
 
 			node.value.OnGUI(item.Rect);
 
@@ -213,10 +141,9 @@ namespace LordSheo.Editor.Windows
 			}
 
 			HandleMenuItemMiddleClick(item, node);
-
 		}
 
-		private void HandleMenuItemMiddleClick(OdinMenuItem item, Node<ITreeStyleProjectValue> node)
+		private void HandleMenuItemMiddleClick(OdinMenuItem item, Node<IValue> node)
 		{
 			if (Event.current.button != 2 || Event.current.type != EventType.MouseUp)
 			{
@@ -269,16 +196,6 @@ namespace LordSheo.Editor.Windows
 
 			base.DrawMenu();
 
-			HandleMenuDropZone();
-		}
-
-		private void HandleMenuDropZone()
-		{
-			if (string.IsNullOrEmpty(MenuTree.Config.SearchTerm) == false)
-			{
-				return;
-			}
-
 			// NOTE: Need to calculate remaining space after
 			// last item in the tree.
 			GUILayout.BeginVertical();
@@ -286,8 +203,32 @@ namespace LordSheo.Editor.Windows
 			GUILayout.EndVertical();
 
 			var rect = GUILayoutUtility.GetLastRect();
+			
+			HandleMenuDropZone(rect);
 
-			var isDraggingNode = DragAndDropUtilitiesProxy.GetCombinedDraggedObject().Any(o => o is Node<ITreeStyleProjectValue>);
+			//GUILayout.FlexibleSpace();
+
+			if (GUILayout.Button("+"))
+			{
+				var val = new VirtualValue()
+				{
+					name = "NEW FOLDER"
+				};
+				
+				var node = new Node<IValue>(val);
+				
+				graph.AddChild(node);
+			}
+		}
+
+		private void HandleMenuDropZone(Rect rect)
+		{
+			if (string.IsNullOrEmpty(MenuTree.Config.SearchTerm) == false)
+			{
+				return;
+			}
+
+			var isDraggingNode = DragAndDropUtilitiesProxy.GetCombinedDraggedObject().Any(o => o is Node<IValue>);
 
 			if (isDraggingNode)
 			{
@@ -299,9 +240,9 @@ namespace LordSheo.Editor.Windows
 			}
 		}
 
-		private void HandleNodeDropZone(Node<ITreeStyleProjectValue> parent, Rect rect)
+		private void HandleNodeDropZone(Node<IValue> parent, Rect rect)
 		{
-			var droppedNodes = DragAndDropUtilitiesProxy.DropZone<Node<ITreeStyleProjectValue>>(rect);
+			var droppedNodes = DragAndDropUtilitiesProxy.DropZone<Node<IValue>>(rect);
 
 			if (droppedNodes != null)
 			{
@@ -317,7 +258,7 @@ namespace LordSheo.Editor.Windows
 			}
 		}
 
-		private void HandleAssetDropZone(Node<ITreeStyleProjectValue> parent, Rect rect)
+		private void HandleAssetDropZone(Node<IValue> parent, Rect rect)
 		{
 			var dropped = DragAndDropUtilitiesProxy.DropZone<UnityEngine.Object>(rect);
 
@@ -335,14 +276,14 @@ namespace LordSheo.Editor.Windows
 
 				Debug.Log(path);
 
-				var value = new TSP_AssetValue()
+				var value = new AssetValue()
 				{
 					guid = guid.ToString()
 				};
 
 				value.Refresh();
 
-				var node = new Node<ITreeStyleProjectValue>(value);
+				var node = new Node<IValue>(value);
 
 				parent.AddChild(node);
 			}

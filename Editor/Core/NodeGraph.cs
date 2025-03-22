@@ -19,7 +19,7 @@ namespace LordSheo.Editor
 
 		public Node()
 		{
-			guid = System.Guid.NewGuid().ToString();
+			guid = System.Guid.NewGuid().ToString("N").Substring(0, 8);
 		}
 		public Node(T value)
 			: this()
@@ -29,11 +29,20 @@ namespace LordSheo.Editor
 
 		public void AddChild(Node<T> node)
 		{
+			var isSwappingParents = node == parent;
+
+			// Handle adding a parent to a child.
+			if (isSwappingParents)
+			{
+				node.RemoveChild(this);
+				node.parent?.AddChild(this);
+			}
+
 			if (node.parent != null)
 			{
 				node.parent.RemoveChild(node);
 			}
-
+			
 			node.parent = this;
 			children.Add(node);
 

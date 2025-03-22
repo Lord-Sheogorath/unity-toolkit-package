@@ -8,36 +8,6 @@ using UnityEngine;
 
 namespace LordSheo.Editor.Windows.TSP
 {
-	public class VirtualValue : IValue
-	{
-		[JsonIgnore]
-		public string Name => name;
-		[JsonIgnore]
-		public Texture Icon { get; }
-
-		public string name;
-		
-		public bool IsValid()
-		{
-			return true;
-		}
-
-		public void Refresh()
-		{
-		}
-
-		public void Select()
-		{
-		}
-
-		public void OnGUI(Rect rect)
-		{
-			var iconRect = rect.AlignRight(20);
-			var icon = EditorIcons.Pen.Active;
-
-			var content = new GUIContent(icon);
-		}
-	}
 	public class AssetValue : IValue
 	{
 		public string guid;
@@ -77,8 +47,9 @@ namespace LordSheo.Editor.Windows.TSP
 		}
 		public void OnGUI(Rect rect)
 		{
-			if (EventHandler.IsKeyDown(KeyCode.LeftControl))
+			if (Event.current.IsKeyDown(KeyCode.LeftControl))
 			{
+				Debug.Log("LEFT CTRL IS DOWN");
 				var color = Color.cyan;
 				color.a = 0.25f;
 

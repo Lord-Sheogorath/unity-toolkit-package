@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Sirenix.OdinInspector.Editor.Drawers;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
@@ -34,6 +35,11 @@ namespace LordSheo.Editor
 		public static object[] GetDraggedObjects()
 		{
 			return (object[])draggingObjectsField.GetValue(null);
+		}
+		public static void SetCombinedDraggedObjects(object[] baseObjectArr, UnityEngine.Object[] unityObjectArr)
+		{
+			draggingObjectsField.SetValue(null, baseObjectArr);
+			DragAndDrop.objectReferences = unityObjectArr;
 		}
 
 		public static T[] DropZone<T>(Rect rect)

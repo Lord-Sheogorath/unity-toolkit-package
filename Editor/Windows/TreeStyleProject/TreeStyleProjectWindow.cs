@@ -7,6 +7,7 @@ using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 
 namespace LordSheo.Editor.Windows.TSP
 {
@@ -29,6 +30,18 @@ namespace LordSheo.Editor.Windows.TSP
 			MenuWidth = position.width;
 
 			base.OnImGUI();
+			
+			// foreach (var item in MenuTree.EnumerateTree())
+			// {
+			// 	var node = item.Value as Node<IValue>;
+			// 	
+			// 	if (node == null)
+			// 	{
+			// 		continue;
+			// 	}
+			// 	
+			// 	node.value.OnGUI(item.Rect);
+			// }
 		}
 
 		protected override OdinMenuTree BuildMenuTree()
@@ -129,9 +142,8 @@ namespace LordSheo.Editor.Windows.TSP
 		private void OnDrawMenuItem(OdinMenuItem item)
 		{
 			var node = item.Value as Node<IValue>;
-
 			node.value.OnGUI(item.Rect);
-
+			
 			if (IsSearching == false)
 			{ 
 				DragAndDropUtilities.DragZone(item.Rect, node, true, true);
@@ -205,20 +217,6 @@ namespace LordSheo.Editor.Windows.TSP
 			var rect = GUILayoutUtility.GetLastRect();
 			
 			HandleMenuDropZone(rect);
-
-			//GUILayout.FlexibleSpace();
-
-			if (GUILayout.Button("+"))
-			{
-				var val = new VirtualValue()
-				{
-					name = "NEW FOLDER"
-				};
-				
-				var node = new Node<IValue>(val);
-				
-				graph.AddChild(node);
-			}
 		}
 
 		private void HandleMenuDropZone(Rect rect)

@@ -6,30 +6,32 @@ namespace LordSheo.Editor
 {
 	public static class EventHandler
 	{
+		public static EventType type;
+		
 		public static EventModifiers modifiers;
 		public static KeyCode keyCode;
-		public static EventType type;
+		public static int button;
 
 		public static void Update(Event current)
 		{
 			try
 			{
-				var valid = current.type switch
+				if (current.type == EventType.KeyDown)
 				{
-					EventType.KeyDown => true,
-					EventType.KeyUp => true,
-
-					_ => false,
-				};
-
-				if (valid == false)
-				{
-					return;
+					type = EventType.KeyDown;
 				}
-
+				else if (current.type == EventType.KeyUp)
+				{
+					type = EventType.KeyUp;
+				}
+				else if (current.keyCode == KeyCode.None)
+				{
+					type = EventType.Ignore;
+				}
+				
 				modifiers = current.modifiers;
 				keyCode = current.keyCode;
-				type = current.type;
+				button = current.button;
 			}
 			catch (System.Exception e)
 			{
@@ -44,6 +46,11 @@ namespace LordSheo.Editor
 		public static bool IsKeyUp(KeyCode key)
 		{
 			return key == keyCode && type == EventType.KeyUp;
+		}
+
+		public static void Use()
+		{
+			type = EventType.Used;
 		}
 	}
 }

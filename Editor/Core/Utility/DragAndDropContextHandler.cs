@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEditor;
-using UnityEngine;
+using Debug = UnityEngine.Debug;
 
-namespace LordSheo.Editor.Windows
+namespace LordSheo.Editor
 {
 	public static class DragAndDropContextHandler
 	{

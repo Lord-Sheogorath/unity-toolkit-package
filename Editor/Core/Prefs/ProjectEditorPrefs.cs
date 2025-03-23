@@ -7,9 +7,9 @@ using UEditorPrefs = UnityEditor.EditorPrefs;
 
 namespace LordSheo.Editor
 {
-	public class EditorPrefs : IPrefs
+	public class ProjectEditorPrefs : IPrefs
 	{
-		public static EditorPrefs Instance { get; set; } = new EditorPrefs();
+		public static ProjectEditorPrefs Instance { get; set; } = new ProjectEditorPrefs();
 
 		public bool Contains(string key)
 		{
@@ -67,7 +67,7 @@ namespace LordSheo.Editor
 
 		public string Format(string key)
 		{
-			return Application.productName + "_" + key;
+			return PlayerSettings.productGUID + "_" + key;
 		}
 	}
 }

@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace LordSheo.Editor
 {
-	public static class ReflectionUtility
+	public static class ReflectionUtil
 	{
 		public static FieldInfo FindFieldInfo(Type type, Type target, string name, BindingFlags flags)
 		{

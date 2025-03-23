@@ -36,7 +36,7 @@ namespace LordSheo.Editor
 				return (T)value;
 			}
 
-			var json = UnityEditor.EditorPrefs.GetString(type.Name, string.Empty);
+			var json = ProjectEditorPrefs.Instance.GetString(type.Name, string.Empty);
 			var settings = default(T);
 			var valid = false;
 
@@ -75,7 +75,7 @@ namespace LordSheo.Editor
 				EditorSettings.settings[type] = settings;
 
 				var json = SerialiseSettings(settings);
-				UnityEditor.EditorPrefs.SetString(type.Name, json);
+				ProjectEditorPrefs.Instance.SetString(type.Name, json);
 			}
 			catch (System.Exception e)
 			{

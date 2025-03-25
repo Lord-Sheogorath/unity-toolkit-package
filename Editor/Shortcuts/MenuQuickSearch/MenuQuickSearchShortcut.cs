@@ -67,7 +67,8 @@ namespace LordSheo.Editor.Shortcuts
 				.ToArray();
 
 			var menu = new BetterGenericSelector<StringSearch>(null, false, items);
-
+			menu.showItemPathsAsNames = Settings.showMenuPathsAsNames;
+			
 			var window = menu.ShowInPopup(500);
 
 			menu.SetWindow(window);

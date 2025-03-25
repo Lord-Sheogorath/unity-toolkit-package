@@ -15,6 +15,7 @@ namespace LordSheo.Editor.Shortcuts
 		}
 		public static MenuQuickSearchSettings Instance => EditorSettings.GetSettings<MenuQuickSearchSettings>(new DefaultSettings());
 
+		public bool showMenuPathsAsNames = false;
 		public List<string> ignoredMenuNames = new List<string>();
 
 		public bool IsValid(ScriptingMenuItemProxy item)

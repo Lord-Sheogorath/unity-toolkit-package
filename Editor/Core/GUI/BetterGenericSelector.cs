@@ -6,6 +6,7 @@ using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities.Editor;
 using System;
 using System.Text.RegularExpressions;
+using Codice.Client.BaseCommands;
 using Sirenix.OdinInspector;
 
 namespace LordSheo.Editor.UI
@@ -115,7 +116,7 @@ namespace LordSheo.Editor.UI
 		}
 
 		[NonSerialized]
-		public Dictionary<OdinMenuItem, SearchInfo> cachedSearchInfo = new();
+		public readonly Dictionary<OdinMenuItem, SearchInfo> cachedSearchInfo = new();
 
 		[NonSerialized]
 		public string cachedSearchTerm;
@@ -128,6 +129,9 @@ namespace LordSheo.Editor.UI
 
 		[NonSerialized]
 		public bool isValidSearchTerm = true;
+
+		[NonSerialized, ShowInInspector, PropertyOrder(-1)]
+		public bool showItemPathsAsNames = false;
 
 		public string SearchTerm => SelectionTree.Config.SearchTerm;
 
@@ -144,11 +148,13 @@ namespace LordSheo.Editor.UI
 
 		public void SetWindow(OdinEditorWindow window)
 		{
-			if (window != null)
+			if (this.window != null)
 			{
-				window.OnBeginGUI -= OnBeginGUI;
-				window.OnEndGUI -= OnEndGUI;
+				this.window.OnBeginGUI -= OnBeginGUI;
+				this.window.OnEndGUI -= OnEndGUI;
 			}
+			
+			this.window = window;
 
 			window.OnBeginGUI += OnBeginGUI;
 			window.OnEndGUI += OnEndGUI;
@@ -173,7 +179,7 @@ namespace LordSheo.Editor.UI
 				return;
 			}
 
-			if (item.IsSelected)
+			if (item.IsSelected || showItemPathsAsNames)
 			{
 				OnDrawSelectedItem(item);
 			}
@@ -182,16 +188,8 @@ namespace LordSheo.Editor.UI
 		private void OnDrawSelectedItem(OdinMenuItem item)
 		{
 			var path = item.GetFullPath();
-
-			var color = SelectionTree.Config.DefaultMenuStyle.SelectedColor;
-			var style = SelectionTree.Config.DefaultMenuStyle.SelectedLabelStyle;
-
-			var rect = item.LabelRect;
-
-			var content = new GUIContent(path);
-
-			EditorGUI.DrawRect(rect, color);
-			EditorGUI.LabelField(rect, content, style);
+			
+			OdinUtil.DrawOverContent(item, path);
 		}
 
 		protected void OnBeginGUI()

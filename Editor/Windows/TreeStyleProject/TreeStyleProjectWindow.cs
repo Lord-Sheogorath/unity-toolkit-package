@@ -17,7 +17,7 @@ namespace LordSheo.Editor.Windows.TSP
 
 		public bool IsSearching => string.IsNullOrEmpty(MenuTree.Config.SearchTerm) == false;
 
-		[MenuItem("Windows/" + ConstValues.NAMESPACE_PATH + nameof(TreeStyleProjectWindow))]
+		[MenuItem("Window/" + ConstValues.NAMESPACE_PATH + nameof(TreeStyleProjectWindow))]
 		private static TreeStyleProjectWindow Open()
 		{
 			return TreeStyleProjectWindow.CreateWindow<TreeStyleProjectWindow>();
@@ -30,18 +30,6 @@ namespace LordSheo.Editor.Windows.TSP
 			MenuWidth = position.width;
 
 			base.OnImGUI();
-			
-			// foreach (var item in MenuTree.EnumerateTree())
-			// {
-			// 	var node = item.Value as Node<IValue>;
-			// 	
-			// 	if (node == null)
-			// 	{
-			// 		continue;
-			// 	}
-			// 	
-			// 	node.value.OnGUI(item.Rect);
-			// }
 		}
 
 		protected override OdinMenuTree BuildMenuTree()

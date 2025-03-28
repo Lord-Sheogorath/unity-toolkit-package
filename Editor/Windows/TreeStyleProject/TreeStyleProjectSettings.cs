@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 
-namespace LordSheo.Editor.Windows
+namespace LordSheo.Editor.Windows.TSP
 {
 	public class TreeStyleProjectSettings
 	{

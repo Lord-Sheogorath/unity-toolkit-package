@@ -23,14 +23,25 @@ namespace LordSheo.Editor.Windows.TSP
 			return TreeStyleProjectWindow.CreateWindow<TreeStyleProjectWindow>();
 		}
 
+		#if ODIN_INSPECTOR_3_3
 		protected override void OnImGUI()
+		{
+			EventHandler.Update(Event.current);
+		
+			MenuWidth = position.width;
+		
+			base.OnImGUI();
+		}
+		#else
+		protected override void OnGUI()
 		{
 			EventHandler.Update(Event.current);
 
 			MenuWidth = position.width;
 
-			base.OnImGUI();
+			base.OnGUI();	
 		}
+		#endif
 
 		protected override OdinMenuTree BuildMenuTree()
 		{

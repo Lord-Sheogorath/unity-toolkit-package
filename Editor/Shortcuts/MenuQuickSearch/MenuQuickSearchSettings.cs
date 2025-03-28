@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEditor;
+using UnityEngine;
 
 namespace LordSheo.Editor.Shortcuts
 {
@@ -16,11 +18,19 @@ namespace LordSheo.Editor.Shortcuts
 		public static MenuQuickSearchSettings Instance => EditorSettings.GetSettings<MenuQuickSearchSettings>(new DefaultSettings());
 
 		public bool showMenuPathsAsNames = false;
-		public List<string> ignoredMenuNames = new List<string>();
+		public List<StringMatch> ignoredMenuMatches = new();
 
 		public bool IsValid(ScriptingMenuItemProxy item)
 		{
-			return ignoredMenuNames.Any(n => item.path.StartsWith(n)) == false;
+			foreach (var match in ignoredMenuMatches)
+			{
+				if (match.IsMatch(item.path))
+				{
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		[SettingsProvider]

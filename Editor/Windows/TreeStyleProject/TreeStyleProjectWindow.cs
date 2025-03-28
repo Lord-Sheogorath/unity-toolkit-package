@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using Sirenix.OdinInspector.Editor;
@@ -7,15 +9,18 @@ using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
 namespace LordSheo.Editor.Windows.TSP
 {
+	// NOTE: This MIGHT just serialise correctly?
 	public class TreeStyleProjectWindow : OdinMenuEditorWindow
 	{
 		public NodeGraph<IValue> graph = new();
 
 		public bool IsSearching => string.IsNullOrEmpty(MenuTree.Config.SearchTerm) == false;
+
+		private JsonSerializerSettings _settings;
+		private NodeGraphSerialiser<IValue> _serialiser;
 
 		[MenuItem("Window/" + ConstValues.NAMESPACE_PATH + nameof(TreeStyleProjectWindow))]
 		private static TreeStyleProjectWindow Open()
@@ -23,16 +28,42 @@ namespace LordSheo.Editor.Windows.TSP
 			return TreeStyleProjectWindow.CreateWindow<TreeStyleProjectWindow>();
 		}
 
-		#if ODIN_INSPECTOR_3_3
+		private void Init()
+		{
+			// TO-DO: Clean this up
+			_settings ??= new JsonSerializerSettings()
+			{
+				Converters = new List<JsonConverter>()
+				{
+					new TSPJsonConverter()
+				}
+			};
+
+			_serialiser ??= new NodeGraphSerialiser<IValue>(_settings);
+		}
+
+		protected override void OnEnable()
+		{
+			base.OnEnable();
+
+			Init();
+
+			var json = ProjectEditorPrefs.Instance.GetString(nameof(TreeStyleProjectWindow), "");
+			graph = _serialiser.Deserialise(json) ?? new();
+
+			InternalForceMenuTreeRebuild();
+		}
+
+#if ODIN_INSPECTOR_3_3
 		protected override void OnImGUI()
 		{
 			EventHandler.Update(Event.current);
-		
+
 			MenuWidth = position.width;
-		
+
 			base.OnImGUI();
 		}
-		#else
+#else
 		protected override void OnGUI()
 		{
 			EventHandler.Update(Event.current);
@@ -41,7 +72,7 @@ namespace LordSheo.Editor.Windows.TSP
 
 			base.OnGUI();	
 		}
-		#endif
+#endif
 
 		protected override OdinMenuTree BuildMenuTree()
 		{
@@ -90,10 +121,9 @@ namespace LordSheo.Editor.Windows.TSP
 				AddChildren(tree, node, name);
 			}
 		}
+
 		private string Add(OdinMenuTree tree, Node<IValue> node, string parent)
 		{
-			Debug.Log("NODE: " + JsonConvert.SerializeObject(node));
-
 			node.value.Refresh();
 
 			var name = "[Missing] " + node.value.Name;
@@ -142,9 +172,9 @@ namespace LordSheo.Editor.Windows.TSP
 		{
 			var node = item.Value as Node<IValue>;
 			node.value.OnGUI(item.Rect);
-			
+
 			if (IsSearching == false)
-			{ 
+			{
 				DragAndDropUtilities.DragZone(item.Rect, node, true, true);
 
 				HandleAssetDropZone(node, item.Rect);
@@ -175,7 +205,7 @@ namespace LordSheo.Editor.Windows.TSP
 			}
 
 			node.parent?.RemoveChild(node);
-			ForceMenuTreeRebuild();
+			ForceAllMenuTreeRebuild();
 
 			Event.current.Use();
 		}
@@ -185,12 +215,14 @@ namespace LordSheo.Editor.Windows.TSP
 			var toolbarHeight = this.MenuTree.Config.SearchToolbarHeight;
 
 			SirenixEditorGUI.BeginHorizontalToolbar(toolbarHeight);
+
 			GUILayout.FlexibleSpace();
 
 			if (SirenixEditorGUI.ToolbarButton("Refresh"))
 			{
-				ForceMenuTreeRebuild();
+				ForceAllMenuTreeRebuild();
 			}
+
 			if (SirenixEditorGUI.ToolbarButton("Clear"))
 			{
 				var children = graph.children.ToList();
@@ -200,7 +232,7 @@ namespace LordSheo.Editor.Windows.TSP
 					graph.RemoveChild(node);
 				}
 
-				ForceMenuTreeRebuild();
+				ForceAllMenuTreeRebuild();
 			}
 
 			SirenixEditorGUI.EndHorizontalToolbar();
@@ -214,7 +246,7 @@ namespace LordSheo.Editor.Windows.TSP
 			GUILayout.EndVertical();
 
 			var rect = GUILayoutUtility.GetLastRect();
-			
+
 			HandleMenuDropZone(rect);
 		}
 
@@ -250,7 +282,7 @@ namespace LordSheo.Editor.Windows.TSP
 
 				if (droppedNodes.Length > 0)
 				{
-					ForceMenuTreeRebuild();
+					ForceAllMenuTreeRebuild();
 				}
 			}
 		}
@@ -285,7 +317,29 @@ namespace LordSheo.Editor.Windows.TSP
 				parent.AddChild(node);
 			}
 
+			ForceAllMenuTreeRebuild();
+		}
+
+		public void ForceAllMenuTreeRebuild()
+		{
+			var windows = WindowUtil.GetOpenWindows<TreeStyleProjectWindow>();
+
+			foreach (var window in windows)
+			{
+				window.InternalForceMenuTreeRebuild();
+			}
+		}
+
+		public void InternalForceMenuTreeRebuild()
+		{
+			var json = _serialiser.Serialise(graph);
+
+			ProjectEditorPrefs.Instance.SetString(nameof(TreeStyleProjectWindow), json);
+
+			Debug.Log(json);
+
 			ForceMenuTreeRebuild();
+			Repaint();
 		}
 	}
 }

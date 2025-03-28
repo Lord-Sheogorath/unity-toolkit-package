@@ -8,9 +8,11 @@ using UnityEngine;
 
 namespace LordSheo.Editor.Windows.TSP
 {
+	[TypeGuid("3F409B29-2BE5-45CF-8B0C-DB129EFAE616")]
 	public class AssetValue : IValue
 	{
 		public string guid;
+		[JsonIgnore]
 		public string name;
 
 		[JsonIgnore]
@@ -47,16 +49,6 @@ namespace LordSheo.Editor.Windows.TSP
 		}
 		public void OnGUI(Rect rect)
 		{
-			if (Event.current.IsKeyDown(KeyCode.LeftControl))
-			{
-				Debug.Log("LEFT CTRL IS DOWN");
-				var color = Color.cyan;
-				color.a = 0.25f;
-
-				EditorGUI.DrawRect(rect, color);
-				DragAndDropUtilities.DragZone<UnityEngine.Object>(rect, asset, true, true);
-			}
-
 			if (rect.Contains(Event.current.mousePosition) == false)
 			{
 				return;

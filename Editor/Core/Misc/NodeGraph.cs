@@ -14,7 +14,9 @@ namespace LordSheo.Editor
 		public Node<T> parent;
 		public List<Node<T>> children = new();
 
+		[JsonIgnore]
 		public System.Action<Node<T>> addedCallback;
+		[JsonIgnore]
 		public System.Action<Node<T>> removedCallback;
 
 		public Node()
@@ -93,13 +95,20 @@ namespace LordSheo.Editor
 
 	public class NodeGraphSerialiser<T>
 	{
+		public readonly JsonSerializerSettings settings;
+		
+		public NodeGraphSerialiser(JsonSerializerSettings settings)
+		{
+			this.settings = settings;
+		}
+		
 		public virtual string Serialise(NodeGraph<T> graph)
 		{
-			return JsonConvert.SerializeObject(graph);
+			return JsonConvert.SerializeObject(graph, settings);
 		}
 		public virtual NodeGraph<T> Deserialise(string json)
 		{
-			return JsonConvert.DeserializeObject<NodeGraph<T>>(json);
+			return JsonConvert.DeserializeObject<NodeGraph<T>>(json, settings);
 		}
 	}
 }

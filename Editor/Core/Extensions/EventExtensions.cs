@@ -12,5 +12,15 @@ namespace LordSheo.Editor
 		{
 			return current.keyCode == key && current.type == EventType.KeyUp;
 		}
+
+		public static bool IsMouseDown(this Event current, int button)
+		{
+			return current.button == button && current.type == EventType.MouseDown;
+		}
+
+		public static bool IsMouseUp(this Event current, int button)
+		{
+			return current.button == button && current.type == EventType.MouseUp;
+		}
 	}
 }

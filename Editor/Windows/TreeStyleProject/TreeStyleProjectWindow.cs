@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
+using Unity.VisualScripting.YamlDotNet.Core;
 using UnityEditor;
 using UnityEngine;
 
@@ -16,6 +17,7 @@ namespace LordSheo.Editor.Windows.TSP
 	public class TreeStyleProjectWindow : OdinMenuEditorWindow
 	{
 		public NodeGraph<IValue> graph = new();
+		public bool isDirty;
 
 		public bool IsSearching => string.IsNullOrEmpty(MenuTree.Config.SearchTerm) == false;
 
@@ -25,7 +27,17 @@ namespace LordSheo.Editor.Windows.TSP
 		[MenuItem("Window/" + ConstValues.NAMESPACE_PATH + nameof(TreeStyleProjectWindow))]
 		private static TreeStyleProjectWindow Open()
 		{
-			return TreeStyleProjectWindow.CreateWindow<TreeStyleProjectWindow>();
+			var openWindow = WindowUtil.GetOpenWindows<TreeStyleProjectWindow>()
+				.FirstOrDefault();
+
+			if (openWindow == null)
+			{
+				return TreeStyleProjectWindow.CreateWindow<TreeStyleProjectWindow>();
+			}
+
+			EditorApplicationUtility.ForceFocusWindow(openWindow);
+			
+			return openWindow;
 		}
 
 		private void Init()
@@ -51,7 +63,7 @@ namespace LordSheo.Editor.Windows.TSP
 			var json = ProjectEditorPrefs.Instance.GetString(nameof(TreeStyleProjectWindow), "");
 			graph = _serialiser.Deserialise(json) ?? new();
 
-			InternalForceMenuTreeRebuild();
+			SetDirty();
 		}
 
 #if ODIN_INSPECTOR_3_3
@@ -62,6 +74,11 @@ namespace LordSheo.Editor.Windows.TSP
 			MenuWidth = position.width;
 
 			base.OnImGUI();
+
+			if (isDirty)
+			{
+				InternalForceMenuTreeRebuild();
+			}
 		}
 #else
 		protected override void OnGUI()
@@ -73,6 +90,43 @@ namespace LordSheo.Editor.Windows.TSP
 			base.OnGUI();	
 		}
 #endif
+
+		private void DrawNodeDraggingHandle()
+		{
+			var draggedNode = DragAndDropUtilitiesProxy.GetDraggedObjects()
+				.OfType<Node<IValue>>()
+				.FirstOrDefault();
+
+			if (draggedNode == null)
+			{
+				return;
+			}
+			
+			var draggedItem = MenuTree
+				.EnumerateTree()
+				.FirstOrDefault(i =>
+				{
+					var node = i.Value as Node<IValue>;
+
+					if (node == null)
+					{
+						return false;
+					}
+
+					return node == draggedNode;
+				});
+
+			if (draggedItem == null)
+			{
+				return;
+			}
+
+			var rect = draggedItem.Rect;
+			rect.position = Event.current.mousePosition;
+
+			// TO-DO: Make this work outside of the TSP window.
+			EditorGUI.DrawRect(rect, Color.blue);
+		}
 
 		protected override OdinMenuTree BuildMenuTree()
 		{
@@ -166,6 +220,9 @@ namespace LordSheo.Editor.Windows.TSP
 		private void OnAddNode(Node<IValue> node, OdinMenuItem item)
 		{
 			item.OnDrawItem += OnDrawMenuItem;
+
+			node.modifiedCallback -= SetDirty;
+			node.modifiedCallback += SetDirty;
 		}
 
 		private void OnDrawMenuItem(OdinMenuItem item)
@@ -186,7 +243,7 @@ namespace LordSheo.Editor.Windows.TSP
 
 		private void HandleMenuItemMiddleClick(OdinMenuItem item, Node<IValue> node)
 		{
-			if (Event.current.button != 2 || Event.current.type != EventType.MouseUp)
+			if (Event.current.IsMouseUp(2) == false)
 			{
 				return;
 			}
@@ -326,20 +383,34 @@ namespace LordSheo.Editor.Windows.TSP
 
 			foreach (var window in windows)
 			{
-				window.InternalForceMenuTreeRebuild();
+				window.SetDirty();
 			}
 		}
 
 		public void InternalForceMenuTreeRebuild()
 		{
-			var json = _serialiser.Serialise(graph);
+			isDirty = false;
+			
+			try
+			{
+				var json = _serialiser.Serialise(graph);
 
-			ProjectEditorPrefs.Instance.SetString(nameof(TreeStyleProjectWindow), json);
+				ProjectEditorPrefs.Instance.SetString(nameof(TreeStyleProjectWindow), json);
 
-			Debug.Log(json);
+				Debug.Log(json);
+			}
+			catch (Exception e)
+			{
+				Debug.LogException(e);
+			}
 
 			ForceMenuTreeRebuild();
 			Repaint();
+		}
+
+		public void SetDirty()
+		{
+			isDirty = true;
 		}
 	}
 }

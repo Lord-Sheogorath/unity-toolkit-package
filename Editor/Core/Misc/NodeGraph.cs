@@ -19,6 +19,9 @@ namespace LordSheo.Editor
 		[JsonIgnore]
 		public System.Action<Node<T>> removedCallback;
 
+		[JsonIgnore]
+		public System.Action modifiedCallback;
+
 		public Node()
 		{
 			guid = System.Guid.NewGuid().ToString("N").Substring(0, 8);
@@ -49,6 +52,7 @@ namespace LordSheo.Editor
 			children.Add(node);
 
 			addedCallback?.Invoke(node);
+			modifiedCallback?.Invoke();
 		}
 		public void RemoveChild(Node<T> node)
 		{
@@ -62,6 +66,7 @@ namespace LordSheo.Editor
 			node.parent = null;
 
 			removedCallback?.Invoke(node);
+			modifiedCallback?.Invoke();
 		}
 
 		public void Refresh()

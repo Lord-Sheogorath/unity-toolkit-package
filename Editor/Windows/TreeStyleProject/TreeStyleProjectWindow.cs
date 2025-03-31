@@ -1,28 +1,21 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
+using System.Dynamic;
 using System.Linq;
 using Newtonsoft.Json;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
-using Unity.VisualScripting.YamlDotNet.Core;
 using UnityEditor;
 using UnityEngine;
 
 namespace LordSheo.Editor.Windows.TSP
 {
 	// NOTE: This MIGHT just serialise correctly?
-	public class TreeStyleProjectWindow : OdinMenuEditorWindow
+	public class TreeStyleProjectWindow : NodeGraphMenuWindow<ITreeStyleValue>
 	{
-		public NodeGraph<IValue> graph = new();
-		public bool isDirty;
-
-		public bool IsSearching => string.IsNullOrEmpty(MenuTree.Config.SearchTerm) == false;
-
-		private JsonSerializerSettings _settings;
-		private NodeGraphSerialiser<IValue> _serialiser;
+		protected override bool DeleteChildrenWithParent => TreeStyleProjectSettings.Instance.deleteChildrenWithParent;
 
 		[MenuItem("Window/" + ConstValues.NAMESPACE_PATH + nameof(TreeStyleProjectWindow))]
 		private static TreeStyleProjectWindow Open()
@@ -36,199 +29,33 @@ namespace LordSheo.Editor.Windows.TSP
 			}
 
 			EditorApplicationUtility.ForceFocusWindow(openWindow);
-			
+
 			return openWindow;
 		}
 
-		private void Init()
+		protected override void Setup()
 		{
-			// TO-DO: Clean this up
-			_settings ??= new JsonSerializerSettings()
+			settings = new()
 			{
 				Converters = new List<JsonConverter>()
 				{
 					new TSPJsonConverter()
 				}
 			};
-
-			_serialiser ??= new NodeGraphSerialiser<IValue>(_settings);
-		}
-
-		protected override void OnEnable()
-		{
-			base.OnEnable();
-
-			Init();
-
-			var json = ProjectEditorPrefs.Instance.GetString(nameof(TreeStyleProjectWindow), "");
-			graph = _serialiser.Deserialise(json) ?? new();
-
-			SetDirty();
-		}
-
-#if ODIN_INSPECTOR_3_3
-		protected override void OnImGUI()
-		{
-			EventHandler.Update(Event.current);
-
-			MenuWidth = position.width;
-
-			base.OnImGUI();
-
-			if (isDirty)
-			{
-				InternalForceMenuTreeRebuild();
-			}
-		}
-#else
-		protected override void OnGUI()
-		{
-			EventHandler.Update(Event.current);
-
-			MenuWidth = position.width;
-
-			base.OnGUI();	
-		}
-#endif
-
-		private void DrawNodeDraggingHandle()
-		{
-			var draggedNode = DragAndDropUtilitiesProxy.GetDraggedObjects()
-				.OfType<Node<IValue>>()
-				.FirstOrDefault();
-
-			if (draggedNode == null)
-			{
-				return;
-			}
+			serialiser = new(settings);
 			
-			var draggedItem = MenuTree
-				.EnumerateTree()
-				.FirstOrDefault(i =>
-				{
-					var node = i.Value as Node<IValue>;
-
-					if (node == null)
-					{
-						return false;
-					}
-
-					return node == draggedNode;
-				});
-
-			if (draggedItem == null)
-			{
-				return;
-			}
-
-			var rect = draggedItem.Rect;
-			rect.position = Event.current.mousePosition;
-
-			// TO-DO: Make this work outside of the TSP window.
-			EditorGUI.DrawRect(rect, Color.blue);
+			var json = ProjectEditorPrefs.Instance.GetString(nameof(TreeStyleProjectWindow), "");
+			
+			graph = serialiser.Deserialise(json) ?? new();
+			
+			base.Setup();
 		}
 
-		protected override OdinMenuTree BuildMenuTree()
+		protected override void OnDrawMenuItem(OdinMenuItem item)
 		{
-			var tree = new OdinMenuTree();
-			tree.Config.DrawSearchToolbar = true;
-
-			tree.Selection.SelectionChanged += OnSelectionChanged;
-
-			foreach (var child in graph.children)
-			{
-				try
-				{
-					var parent = Add(tree, child, "");
-					AddChildren(tree, child, parent);
-				}
-				catch (Exception e)
-				{
-					Debug.LogException(e);
-				}
-			}
-
-			return tree;
-		}
-
-		private void OnSelectionChanged(SelectionChangedType type)
-		{
-			if (type == SelectionChangedType.ItemAdded)
-			{
-				var nodes = MenuTree.Selection.SelectedValues
-					.OfType<Node<IValue>>()
-					.Select(n => n.value);
-
-				foreach (var value in nodes)
-				{
-					value.Select();
-				}
-			}
-		}
-
-		private void AddChildren(OdinMenuTree tree, Node<IValue> root, string parent)
-		{
-			foreach (var node in root.children)
-			{
-				var name = Add(tree, node, parent);
-
-				AddChildren(tree, node, name);
-			}
-		}
-
-		private string Add(OdinMenuTree tree, Node<IValue> node, string parent)
-		{
-			node.value.Refresh();
-
-			var name = "[Missing] " + node.value.Name;
-
-			if (node.value.IsValid())
-			{
-				name = node.value.Name;
-			}
-
-			var path = name;
-
-			if (string.IsNullOrEmpty(parent) == false)
-			{
-				path = parent + "/" + name;
-			}
-
-			var item = new OdinMenuItem(tree, name, node);
-
-			tree.AddMenuItemAtPath(parent, item);
-
-			item.IconGetter = GetItemIcon;
-
-			OnAddNode(node, item);
-
-			return path;
-
-			Texture GetItemIcon()
-			{
-				if (node.value.IsValid())
-				{
-					return node.value.Icon;
-				}
-				else
-				{
-					return EditorIcons.AlertCircle.Active;
-				}
-			}
-		}
-
-		private void OnAddNode(Node<IValue> node, OdinMenuItem item)
-		{
-			item.OnDrawItem += OnDrawMenuItem;
-
-			node.modifiedCallback -= SetDirty;
-			node.modifiedCallback += SetDirty;
-		}
-
-		private void OnDrawMenuItem(OdinMenuItem item)
-		{
-			var node = item.Value as Node<IValue>;
-			node.value.OnGUI(item.Rect);
+			base.OnDrawMenuItem(item);
+			
+			var node = item.Value as Node<ITreeStyleValue>;
 
 			if (IsSearching == false)
 			{
@@ -239,32 +66,6 @@ namespace LordSheo.Editor.Windows.TSP
 			}
 
 			HandleMenuItemMiddleClick(item, node);
-		}
-
-		private void HandleMenuItemMiddleClick(OdinMenuItem item, Node<IValue> node)
-		{
-			if (Event.current.IsMouseUp(2) == false)
-			{
-				return;
-			}
-
-			if (item.Rect.Contains(Event.current.mousePosition) == false)
-			{
-				return;
-			}
-
-			if (TreeStyleProjectSettings.Instance.deleteChildrenWithParent == false)
-			{
-				foreach (var child in node.children.ToArray())
-				{
-					node.parent?.AddChild(child);
-				}
-			}
-
-			node.parent?.RemoveChild(node);
-			ForceAllMenuTreeRebuild();
-
-			Event.current.Use();
 		}
 
 		protected override void DrawMenu()
@@ -314,7 +115,8 @@ namespace LordSheo.Editor.Windows.TSP
 				return;
 			}
 
-			var isDraggingNode = DragAndDropUtilitiesProxy.GetCombinedDraggedObject().Any(o => o is Node<IValue>);
+			var isDraggingNode = DragAndDropUtilitiesProxy.GetCombinedDraggedObject()
+				.Any(o => o is Node<ITreeStyleValue>);
 
 			if (isDraggingNode)
 			{
@@ -326,9 +128,9 @@ namespace LordSheo.Editor.Windows.TSP
 			}
 		}
 
-		private void HandleNodeDropZone(Node<IValue> parent, Rect rect)
+		private void HandleNodeDropZone(Node<ITreeStyleValue> parent, Rect rect)
 		{
-			var droppedNodes = DragAndDropUtilitiesProxy.DropZone<Node<IValue>>(rect);
+			var droppedNodes = DragAndDropUtilitiesProxy.DropZone<Node<ITreeStyleValue>>(rect);
 
 			if (droppedNodes != null)
 			{
@@ -344,7 +146,7 @@ namespace LordSheo.Editor.Windows.TSP
 			}
 		}
 
-		private void HandleAssetDropZone(Node<IValue> parent, Rect rect)
+		private void HandleAssetDropZone(Node<ITreeStyleValue> parent, Rect rect)
 		{
 			var dropped = DragAndDropUtilitiesProxy.DropZone<UnityEngine.Object>(rect);
 
@@ -369,7 +171,7 @@ namespace LordSheo.Editor.Windows.TSP
 
 				value.Refresh();
 
-				var node = new Node<IValue>(value);
+				var node = new Node<ITreeStyleValue>(value);
 
 				parent.AddChild(node);
 			}
@@ -383,17 +185,15 @@ namespace LordSheo.Editor.Windows.TSP
 
 			foreach (var window in windows)
 			{
-				window.SetDirty();
+				window.SetWindowDirty();
 			}
 		}
 
-		public void InternalForceMenuTreeRebuild()
+		public override void InternalForceMenuTreeRebuild()
 		{
-			isDirty = false;
-			
 			try
 			{
-				var json = _serialiser.Serialise(graph);
+				var json = serialiser.Serialise(graph);
 
 				ProjectEditorPrefs.Instance.SetString(nameof(TreeStyleProjectWindow), json);
 
@@ -403,14 +203,8 @@ namespace LordSheo.Editor.Windows.TSP
 			{
 				Debug.LogException(e);
 			}
-
-			ForceMenuTreeRebuild();
-			Repaint();
-		}
-
-		public void SetDirty()
-		{
-			isDirty = true;
+			
+			base.InternalForceMenuTreeRebuild();
 		}
 	}
 }

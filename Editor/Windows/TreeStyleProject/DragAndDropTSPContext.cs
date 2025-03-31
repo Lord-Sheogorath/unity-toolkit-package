@@ -10,7 +10,7 @@ namespace LordSheo.Editor.Windows.TSP
 	// to instead use their asset reference if they have one.
 	public static class DragAndDropTSPContext
 	{
-		private static readonly Dictionary<UnityEngine.Object, Node<IValue>> draggedNodeReferences = new();
+		private static readonly Dictionary<UnityEngine.Object, Node<ITreeStyleValue>> draggedNodeReferences = new();
 		
 		[InitializeOnLoadMethod]
 		public static void Init()
@@ -40,7 +40,7 @@ namespace LordSheo.Editor.Windows.TSP
 				for (var index = draggedObjects.Count - 1; index >= 0; index--)
 				{
 					var obj = draggedObjects[index];
-					var node = obj as Node<IValue>;
+					var node = obj as Node<ITreeStyleValue>;
 
 					if (node == null)
 					{

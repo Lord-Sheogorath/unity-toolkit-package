@@ -4,7 +4,7 @@ using UnityEngine;
 namespace LordSheo.Editor.Windows.TSP
 {
 	[TypeGuid("E00B51D6-14E7-4ABB-A1E6-3DC509A3EB6D")]
-	public class InvalidValue : IValue
+	public class InvalidValue : ITreeStyleValue
 	{
 		public string Name => "INVALID: " + (json != null ? json["T"].ToString() : "MISSING");
 		public Texture Icon { get; }

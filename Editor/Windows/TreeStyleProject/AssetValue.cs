@@ -9,7 +9,7 @@ using UnityEngine;
 namespace LordSheo.Editor.Windows.TSP
 {
 	[TypeGuid("3F409B29-2BE5-45CF-8B0C-DB129EFAE616")]
-	public class AssetValue : IValue
+	public class AssetValue : ITreeStyleValue 
 	{
 		public string guid;
 		[JsonIgnore]

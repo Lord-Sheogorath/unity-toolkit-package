@@ -10,14 +10,14 @@ namespace LordSheo.Editor.Windows.TSP
 	{
 		public override bool CanConvert(Type objectType)
 		{
-			return (typeof(IValue)).IsAssignableFrom(objectType);
+			return (typeof(ITreeStyleValue)).IsAssignableFrom(objectType);
 		}
 
 		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
 		{
 			var jo = new JObject();
 
-			var val = value as IValue;
+			var val = value as ITreeStyleValue;
 			var type = value.GetType();
 
 			var guid = TypeGuidUtil.GetGuid(type).guid;
@@ -46,7 +46,7 @@ namespace LordSheo.Editor.Windows.TSP
 
 				var asset = JsonConvert.DeserializeObject(json, type);
 
-				return asset as IValue;
+				return asset as ITreeStyleValue;
 			}
 			catch (System.Exception e)
 			{

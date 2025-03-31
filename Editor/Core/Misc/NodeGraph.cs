@@ -1,10 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace LordSheo.Editor
 {
+	public interface INodeValue
+	{
+		public string Name { get; }
+		public Texture Icon { get; }
+		
+		void OnGUI(Rect rect);
+		
+		bool IsValid();
+		void Select();
+		void Refresh();
+	}
+	
 	public class Node<T>
+		where T : INodeValue
 	{
 		public string guid;
 
@@ -32,7 +46,7 @@ namespace LordSheo.Editor
 			this.value = value;
 		}
 
-		public void AddChild(Node<T> node)
+		public virtual void AddChild(Node<T> node)
 		{
 			var isSwappingParents = node == parent;
 
@@ -54,7 +68,7 @@ namespace LordSheo.Editor
 			addedCallback?.Invoke(node);
 			modifiedCallback?.Invoke();
 		}
-		public void RemoveChild(Node<T> node)
+		public virtual void RemoveChild(Node<T> node)
 		{
 			var removed = children.Remove(node);
 
@@ -69,8 +83,13 @@ namespace LordSheo.Editor
 			modifiedCallback?.Invoke();
 		}
 
-		public void Refresh()
+		public virtual void Refresh()
 		{
+			if (value != null)
+			{
+				value.Refresh();
+			}
+
 			foreach (var child in children)
 			{
 				child.parent = this;
@@ -78,27 +97,19 @@ namespace LordSheo.Editor
 			}
 		}
 
-		public IEnumerable<Node<T>> GetChildNodesRecursive(bool includeSelf)
+		public virtual bool IsValid()
 		{
-			if (includeSelf)
-			{
-				yield return this;
-			}
-
-			var nodes = children.SelectMany(n => n.GetChildNodesRecursive(includeSelf: true));
-
-			foreach (var item in nodes)
-			{
-				yield return item;
-			}
+			return value.IsValid();
 		}
 	}
 
 	public class NodeGraph<T> : Node<T>
+		where T : INodeValue
 	{
 	}
 
 	public class NodeGraphSerialiser<T>
+		where T : INodeValue
 	{
 		public readonly JsonSerializerSettings settings;
 		

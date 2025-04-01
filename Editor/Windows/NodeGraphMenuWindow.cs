@@ -62,16 +62,17 @@ namespace LordSheo.Editor.Windows
 			MenuWidth = position.width;
 
 			var selectedItems = MenuTree.Selection.ToArray();
-			var selectedItemGuids = selectedItems
-				.Select(i => i.Value)
-				.OfType<Node<T>>()
-				.Select(n => n.guid)
-				.ToHashSet();
 			
 			HandleArrowControls(selectedItems);
 
 			if (isDirty)
 			{
+				var selectedItemGuids = selectedItems
+					.Select(i => i.Value)
+					.OfType<Node<T>>()
+					.Select(n => n.guid)
+					.ToHashSet();
+				
 				InternalForceMenuTreeRebuild();
 
 				var itemsToSelect = MenuTree.EnumerateTree()

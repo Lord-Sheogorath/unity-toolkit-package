@@ -102,6 +102,13 @@ namespace LordSheo.Editor.Windows
 				return;
 			}
 
+			// Don't want to change the order while searching, that
+			// would be weird.
+			if (IsSearching)
+			{
+				return;
+			}
+
 			HandleChildOrderControls(selectedItems);
 			HandleParentControls(selectedItems);
 		}
@@ -207,6 +214,7 @@ namespace LordSheo.Editor.Windows
 					grandParent.children.Insert(parentChildIndex + 1, node);
 					
 					SetWindowDirty();
+					Event.current.Use();
 				}
 				else if (parentIndexOffset == 1)
 				{
@@ -224,6 +232,7 @@ namespace LordSheo.Editor.Windows
 					prevChild.AddChild(node);
 					
 					SetWindowDirty();
+					Event.current.Use();
 				}
 			}
 		}

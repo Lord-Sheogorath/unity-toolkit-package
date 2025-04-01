@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEditor;
-using Debug = UnityEngine.Debug;
+using UnityEngine;
 
 namespace LordSheo.Editor
 {

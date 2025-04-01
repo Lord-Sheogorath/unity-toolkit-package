@@ -1,8 +1,5 @@
 ﻿using System.Linq;
 using Newtonsoft.Json;
-using Sirenix.OdinInspector.Editor;
-using Sirenix.Utilities;
-using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
 

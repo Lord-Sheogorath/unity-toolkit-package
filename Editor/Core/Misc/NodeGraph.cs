@@ -101,6 +101,33 @@ namespace LordSheo.Editor
 		{
 			return value.IsValid();
 		}
+
+		public virtual void PerformOnChildren(System.Action<Node<T>> action)
+		{
+			if (action == null)
+			{
+				return;
+			}
+			
+			foreach (var child in children)
+			{
+				action.Invoke(child);
+				child.PerformOnChildren(action);
+			}
+		}
+
+		public virtual IEnumerable<Node<T>> GetAllChildren()
+		{
+			foreach (var child in children)
+			{
+				yield return child;
+
+				foreach (var subChild in child.GetAllChildren())
+				{
+					yield return subChild;
+				}
+			}
+		}
 	}
 
 	public class NodeGraph<T> : Node<T>

@@ -188,7 +188,7 @@ namespace LordSheo.Editor.UI
 		{
 			var path = item.GetFullPath();
 			
-			OdinUtil.DrawOverContent(item, path);
+			OdinUtil.DrawOverContent(item, new GUIContent(path));
 		}
 
 		protected void OnBeginGUI()

@@ -15,6 +15,8 @@ namespace LordSheo.Editor.Windows.TSP
 	{
 		protected override bool DeleteChildrenWithParent => TreeStyleProjectSettings.Instance.deleteChildrenWithParent;
 
+		private static OdinEditorWindow activeContextWindow;
+		
 		[MenuItem("Window/" + ConstValues.NAMESPACE_PATH + nameof(TreeStyleProjectWindow))]
 		private static TreeStyleProjectWindow Open()
 		{
@@ -62,8 +64,48 @@ namespace LordSheo.Editor.Windows.TSP
 				HandleAssetDropZone(node, item.Rect);
 				HandleNodeDropZone(node, item.Rect);
 			}
+			
+			if (item.Rect.Contains(Event.current.mousePosition) == false)
+			{
+				return;
+			}
 
-			HandleMenuItemMiddleClick(item, node);
+			if (Event.current.button != 1 || Event.current.type != EventType.MouseUp)
+			{
+				return;
+			}
+			
+			// Don't want double ups.
+			activeContextWindow?.Close();
+			
+			var actions = node.value
+				.GetContextActions()
+				.ToArray();
+
+			if (actions.Length > 0)
+			{
+				var menu = new GenericSelector<System.Action>(item.SmartName, false, actions);
+				menu.EnableSingleClickToSelect();
+				menu.SelectionTree.Config.DrawSearchToolbar = actions.Length >= 5;
+				activeContextWindow = menu.ShowInPopup();
+
+				menu.SelectionConfirmed += selectedActions =>
+				{
+					foreach (var action in selectedActions)
+					{
+						try
+						{
+							action?.Invoke();
+						}
+						catch (Exception e)
+						{
+							Debug.LogException(e);
+						}
+					}
+				};
+
+				Event.current.Use();
+			}
 		}
 
 		protected override void DrawMenu()

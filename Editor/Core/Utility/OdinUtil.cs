@@ -55,20 +55,22 @@ namespace LordSheo.Editor.UI
 			return item.Rect.Contains(Event.current.mousePosition);
 		}
 
-		public static void DrawOverContent(OdinMenuItem item, string text)
+		public static void DrawOverContent(OdinMenuItem item, GUIContent content)
 		{
 			var color = item.GetCurrentBackgroundColor();
+			DrawOverContent(item, content, color);
+		}
+		public static void DrawOverContent(OdinMenuItem item, GUIContent content, Color background)
+		{
 			var style = item.GetCurrentLabelStyle();
 
 			var rect = item.LabelRect;
-
-			var content = new GUIContent(text);
 
 			// NOTE: Hover color has low alpha so we need to draw
 			// the default color first so that it doesn't show the
 			// original text underneath.
 			EditorGUI.DrawRect(rect, OdinUtil.DefaultBackgroundColor);
-			EditorGUI.DrawRect(rect, color);
+			EditorGUI.DrawRect(rect, background);
 			EditorGUI.LabelField(rect, content, style);
 		}
 	}

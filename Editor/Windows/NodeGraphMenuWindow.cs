@@ -57,7 +57,7 @@ namespace LordSheo.Editor.Windows
 
 		protected virtual void InternalOnGUI()
 		{
-			EventHandler.Update(Event.current);
+			GUIEventSystem.Current.Update();
 
 			MenuWidth = position.width;
 
@@ -288,7 +288,7 @@ namespace LordSheo.Editor.Windows
 				{
 					try
 					{
-						var parent = Add(tree, child, "");
+						var parent = AddNode(tree, child, "");
 						AddChildren(tree, child, parent);
 					}
 					catch (Exception e)
@@ -324,13 +324,13 @@ namespace LordSheo.Editor.Windows
 		{
 			foreach (var node in root.children)
 			{
-				var name = Add(tree, node, parent);
+				var name = AddNode(tree, node, parent);
 
 				AddChildren(tree, node, name);
 			}
 		}
 
-		protected virtual string Add(OdinMenuTree tree, Node<T> node, string parent)
+		protected virtual string AddNode(OdinMenuTree tree, Node<T> node, string parent)
 		{
 			var name = "[Missing] " + node.value.Name;
 

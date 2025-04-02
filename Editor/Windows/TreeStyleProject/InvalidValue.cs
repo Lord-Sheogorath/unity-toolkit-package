@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using Sirenix.OdinInspector.Editor;
 using UnityEngine;
 
 namespace LordSheo.Editor.Windows.TSP
@@ -31,6 +33,11 @@ namespace LordSheo.Editor.Windows.TSP
 
 		public void OnGUI(Rect rect)
 		{
+		}
+
+		public IEnumerable<GenericSelectorItem<System.Action>> GetContextActions()
+		{
+			yield break;
 		}
 	}
 }

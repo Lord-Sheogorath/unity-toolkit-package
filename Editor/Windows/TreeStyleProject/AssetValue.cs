@@ -1,14 +1,19 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
+using Sirenix.OdinInspector.Editor;
+using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
 
 namespace LordSheo.Editor.Windows.TSP
 {
 	[TypeGuid("3F409B29-2BE5-45CF-8B0C-DB129EFAE616")]
-	public class AssetValue : ITreeStyleValue 
+	public class AssetValue : ITreeStyleValue
 	{
 		public string guid;
+
 		[JsonIgnore]
 		public string name;
 
@@ -19,19 +24,22 @@ namespace LordSheo.Editor.Windows.TSP
 		public string Name => IsValid() ? name : guid;
 
 		[JsonIgnore]
-		public Texture Icon { get; set; }
+		public Texture Icon => GetCurrentIcon();
+
+		private Texture assetIcon;
 
 		public bool IsValid()
 		{
-			return string.IsNullOrEmpty(guid) == false 
+			return string.IsNullOrEmpty(guid) == false
 				&& asset != null;
 		}
+
 		public void Refresh()
 		{
 			if (IsValid() == false)
 			{
 				asset = null;
-				Icon = null;
+				assetIcon = null;
 			}
 
 			var path = AssetDatabase.GUIDToAssetPath(guid);
@@ -39,11 +47,13 @@ namespace LordSheo.Editor.Windows.TSP
 			name = path.Split("/").LastOrDefault();
 			asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(path);
 
-			Icon = AssetDatabase.GetCachedIcon(path);
+			assetIcon = AssetDatabase.GetCachedIcon(path);
 		}
+
 		public void Select()
 		{
 		}
+
 		public void OnGUI(Rect rect)
 		{
 			if (rect.Contains(Event.current.mousePosition) == false)
@@ -56,19 +66,57 @@ namespace LordSheo.Editor.Windows.TSP
 			{
 				return;
 			}
-			
+
 			if (Event.current.clickCount == 1)
 			{
-				Selection.activeObject = asset;
-				EditorGUIUtility.PingObject(asset);
+				if (Event.current.type == EventType.MouseUp)
+				{
+					if (Event.current.control)
+					{
+						var selection = Selection.objects
+							.ToHashSet();
+
+						if (asset != null)
+						{
+							var added = selection.Add(asset);
+
+							if (added == false)
+							{
+								selection.Remove(asset);
+							}
+
+							Selection.objects = selection.ToArray();
+						}
+
+						Event.current.Use();
+					}
+					else
+					{
+						Selection.activeObject = asset;
+					}
+
+					EditorGUIUtility.PingObject(asset);
+				}
 			}
 			else if (Event.current.clickCount == 2)
 			{
-				if (TreeStyleProjectSettings.Instance.enableEditWithDoubleClick)
-				{
-					AssetDatabase.OpenAsset(asset);
-				}
+				AssetDatabase.OpenAsset(asset);
 			}
+		}
+
+		public Texture GetCurrentIcon()
+		{
+			if (Selection.objects.Any(o => o == asset))
+			{
+				return EditorIcons.Link.Active;
+			}
+
+			return assetIcon;
+		}
+
+		public IEnumerable<GenericSelectorItem<System.Action>> GetContextActions()
+		{
+			yield return new("Open", () => { AssetDatabase.OpenAsset(asset); });
 		}
 	}
 }

@@ -16,7 +16,7 @@ namespace LordSheo.Editor.Windows.TSP
 		protected override bool DeleteChildrenWithParent => TreeStyleProjectSettings.Instance.deleteChildrenWithParent;
 
 		private static OdinEditorWindow activeContextWindow;
-		
+
 		[MenuItem("Window/" + ConstValues.NAMESPACE_PATH + nameof(TreeStyleProjectWindow))]
 		private static TreeStyleProjectWindow Open()
 		{
@@ -43,18 +43,46 @@ namespace LordSheo.Editor.Windows.TSP
 				}
 			};
 			serialiser = new(settings);
-			
-			var json = ProjectEditorPrefs.Instance.GetString(nameof(TreeStyleProjectWindow), "");
-			
-			graph = serialiser.Deserialise(json) ?? new();
-			
+
+			Reload();
+
 			base.Setup();
+		}
+
+		protected void Reload()
+		{
+			var json = ProjectEditorPrefs.Instance.GetString(nameof(TreeStyleProjectWindow), "");
+			Load(json);
+		}
+
+		protected void Load(string json)
+		{
+			graph = serialiser.Deserialise(json) ?? new();
+			graph.Refresh();
+			
+			InternalForceMenuTreeRebuild();
+		}
+
+		protected void Save()
+		{
+			try
+			{
+				var json = serialiser.Serialise(graph);
+
+				ProjectEditorPrefs.Instance.SetString(nameof(TreeStyleProjectWindow), json);
+
+				Debug.Log(json);
+			}
+			catch (Exception e)
+			{
+				Debug.LogException(e);
+			}
 		}
 
 		protected override void OnDrawMenuItem(OdinMenuItem item)
 		{
 			base.OnDrawMenuItem(item);
-			
+
 			var node = item.Value as Node<ITreeStyleValue>;
 
 			if (IsSearching == false)
@@ -64,7 +92,7 @@ namespace LordSheo.Editor.Windows.TSP
 				HandleAssetDropZone(node, item.Rect);
 				HandleNodeDropZone(node, item.Rect);
 			}
-			
+
 			if (item.Rect.Contains(Event.current.mousePosition) == false)
 			{
 				return;
@@ -74,10 +102,10 @@ namespace LordSheo.Editor.Windows.TSP
 			{
 				return;
 			}
-			
+
 			// Don't want double ups.
 			activeContextWindow?.Close();
-			
+
 			var actions = node.value
 				.GetContextActions()
 				.ToArray();
@@ -114,23 +142,41 @@ namespace LordSheo.Editor.Windows.TSP
 
 			SirenixEditorGUI.BeginHorizontalToolbar(toolbarHeight);
 
+			if (SirenixEditorGUI.ToolbarButton("Import"))
+			{
+				EditorApplicationUtility.DisplayConfirmAction("TSP - Import", "Are you sure?", () =>
+				{
+					Load(GUIUtility.systemCopyBuffer);
+					Save();	
+				});
+			}
+
+			if (SirenixEditorGUI.ToolbarButton("Export"))
+			{
+				GUIUtility.systemCopyBuffer = serialiser.Serialise(graph);
+			}
+
 			GUILayout.FlexibleSpace();
 
 			if (SirenixEditorGUI.ToolbarButton("Refresh"))
 			{
+				Reload();
 				ForceAllMenuTreeRebuild();
 			}
 
 			if (SirenixEditorGUI.ToolbarButton("Clear"))
 			{
-				var children = graph.children.ToList();
-
-				foreach (var node in children)
+				EditorApplicationUtility.DisplayConfirmAction("TSP - Clear", "Are you sure?", () =>
 				{
-					graph.RemoveChild(node);
-				}
+					var children = graph.children.ToList();
 
-				ForceAllMenuTreeRebuild();
+					foreach (var node in children)
+					{
+						graph.RemoveChild(node);
+					}
+
+					ForceAllMenuTreeRebuild();
+				});
 			}
 
 			SirenixEditorGUI.EndHorizontalToolbar();
@@ -231,19 +277,7 @@ namespace LordSheo.Editor.Windows.TSP
 
 		public override void InternalForceMenuTreeRebuild()
 		{
-			try
-			{
-				var json = serialiser.Serialise(graph);
-
-				ProjectEditorPrefs.Instance.SetString(nameof(TreeStyleProjectWindow), json);
-
-				Debug.Log(json);
-			}
-			catch (Exception e)
-			{
-				Debug.LogException(e);
-			}
-			
+			Save();
 			base.InternalForceMenuTreeRebuild();
 		}
 	}

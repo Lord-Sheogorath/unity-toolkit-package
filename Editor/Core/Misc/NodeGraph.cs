@@ -16,7 +16,8 @@ namespace LordSheo.Editor
 		void Select();
 		void Refresh();
 	}
-	
+
+	[TypeGuid("BD9A5999-0852-4D53-B585-D4B422A5CD1F")]
 	public class Node<T>
 		where T : INodeValue
 	{
@@ -130,6 +131,7 @@ namespace LordSheo.Editor
 		}
 	}
 
+	[TypeGuid("7DC896BE-ED12-487F-B1A3-EA5DFD94752F")]
 	public class NodeGraph<T> : Node<T>
 		where T : INodeValue
 	{

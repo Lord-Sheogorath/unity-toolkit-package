@@ -83,5 +83,17 @@ namespace LordSheo.Editor
 				window.Focus();
 			};
 		}
+
+		public static void DisplayConfirmAction(string title, string text, System.Action action)
+		{
+			var confirmed = EditorUtility.DisplayDialog(title, text, "Confirm", "Cancel");
+
+			if (confirmed == false)
+			{
+				return;
+			}
+			
+			action?.Invoke();
+		}
 	}
 }

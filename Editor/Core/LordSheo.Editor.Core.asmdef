@@ -2,7 +2,9 @@
     "name": "LordSheo.Editor.Core",
     "rootNamespace": "LordSheo.Editor.Core",
     "references": [],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

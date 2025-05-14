@@ -51,7 +51,7 @@ namespace LordSheo.Editor.Windows.TSP
 
 		protected void Reload()
 		{
-			var json = ProjectEditorPrefs.Instance.GetString(nameof(TreeStyleProjectWindow), "");
+			var json = EditorProject.projectOnlyPrefs.GetString(nameof(TreeStyleProjectWindow), "");
 			Load(json);
 		}
 
@@ -69,7 +69,7 @@ namespace LordSheo.Editor.Windows.TSP
 			{
 				var json = serialiser.Serialise(graph);
 
-				ProjectEditorPrefs.Instance.SetString(nameof(TreeStyleProjectWindow), json);
+				EditorProject.projectOnlyPrefs.SetString(nameof(TreeStyleProjectWindow), json);
 
 				Debug.Log(json);
 			}

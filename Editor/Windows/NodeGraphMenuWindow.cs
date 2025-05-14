@@ -67,6 +67,8 @@ namespace LordSheo.Editor.Windows
 
 			if (isDirty)
 			{
+				// Make sure that selected nodes are properly
+				// re-selecting after rebuilding the menu tree.
 				var selectedItemGuids = selectedItems
 					.Select(i => i.Value)
 					.OfType<Node<T>>()

@@ -33,7 +33,7 @@ namespace LordSheo.Editor
 				return (T)value;
 			}
 
-			var json = ProjectEditorPrefs.Instance.GetString(type.Name, string.Empty);
+			var json = EditorProject.prefs.GetString(type.Name, string.Empty);
 			var settings = default(T);
 			var valid = false;
 
@@ -72,7 +72,7 @@ namespace LordSheo.Editor
 				EditorSettings.settings[type] = settings;
 
 				var json = SerialiseSettings(settings);
-				ProjectEditorPrefs.Instance.SetString(type.Name, json);
+				EditorProject.prefs.SetString(type.Name, json);
 			}
 			catch (System.Exception e)
 			{

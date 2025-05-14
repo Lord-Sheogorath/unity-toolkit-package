@@ -12,6 +12,8 @@ namespace LordSheo.Editor.Windows.TSP
 	[TypeGuid("3F409B29-2BE5-45CF-8B0C-DB129EFAE616")]
 	public class AssetValue : ITreeStyleValue
 	{
+		public TreeStyleProjectSettings Settings => TreeStyleProjectSettings.Instance;
+		
 		public string guid;
 
 		[JsonIgnore]
@@ -71,34 +73,46 @@ namespace LordSheo.Editor.Windows.TSP
 			{
 				if (Event.current.type == EventType.MouseUp)
 				{
-					if (Event.current.control)
-					{
-						var selection = Selection.objects
-							.ToHashSet();
-
-						if (asset != null)
-						{
-							var added = selection.Add(asset);
-
-							if (added == false)
-							{
-								selection.Remove(asset);
-							}
-
-							Selection.objects = selection.ToArray();
-						}
-
-						Event.current.Use();
-					}
-					else
-					{
-						Selection.activeObject = asset;
-					}
-
-					EditorGUIUtility.PingObject(asset);
+					SingleClick();
 				}
 			}
 			else if (Event.current.clickCount == 2)
+			{
+				DoubleClick();
+			}
+		}
+		
+		private void SingleClick()
+		{
+			if (Event.current.control)
+			{
+				var selection = Selection.objects
+					.ToHashSet();
+
+				if (asset != null)
+				{
+					var added = selection.Add(asset);
+
+					if (added == false)
+					{
+						selection.Remove(asset);
+					}
+
+					Selection.objects = selection.ToArray();
+				}
+
+				Event.current.Use();
+			}
+			else
+			{
+				Selection.activeObject = asset;
+			}
+
+			EditorGUIUtility.PingObject(asset);
+		}
+		private void DoubleClick()
+		{
+			if (Settings.enableEditWithDoubleClick)
 			{
 				AssetDatabase.OpenAsset(asset);
 			}

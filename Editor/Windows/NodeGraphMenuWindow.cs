@@ -399,16 +399,34 @@ namespace LordSheo.Editor.Windows
 				return;
 			}
 
-			if (DeleteChildrenWithParent)
+			var confirm = false;
+			var childCount = node.GetAllChildCount();
+			
+			if (childCount == 0)
 			{
-				foreach (var child in node.children.ToArray())
+				confirm = EditorUtility.DisplayDialog("Delete Node", "", "Confirm", "Cancel");
+			}
+			else
+			{
+				var message = "Selected = Only selected node." +
+					$"\nNested = Selected node + {childCount} child nodes.";
+				
+				var option = EditorUtility.DisplayDialogComplex("Delete Node", message, "Selected", "Nested", "Cancel");
+				
+				confirm = option != 2;
+
+				if (option == 0)
 				{
-					node.parent?.AddChild(child);
+					node.MoveChildren(node.parent);
 				}
 			}
 
-			node.parent?.RemoveChild(node);
-			InternalForceMenuTreeRebuild();
+			if (confirm)
+			{
+				node.parent?.RemoveChild(node);
+			}
+
+			SetWindowDirty();
 
 			Event.current.Use();
 		}

@@ -12,6 +12,7 @@ namespace LordSheo.Editor.Windows.TSP
 	[TypeGuid("3F409B29-2BE5-45CF-8B0C-DB129EFAE616")]
 	public class AssetValue : ITreeStyleValue
 	{
+		[JsonIgnore]
 		public TreeStyleProjectSettings Settings => TreeStyleProjectSettings.Instance;
 		
 		public string guid;
@@ -71,10 +72,7 @@ namespace LordSheo.Editor.Windows.TSP
 
 			if (Event.current.clickCount == 1)
 			{
-				if (Event.current.type == EventType.MouseUp)
-				{
-					SingleClick();
-				}
+				SingleClick();
 			}
 			else if (Event.current.clickCount == 2)
 			{
@@ -84,6 +82,11 @@ namespace LordSheo.Editor.Windows.TSP
 		
 		private void SingleClick()
 		{
+			if (Event.current.type != EventType.MouseUp)
+			{
+				return;
+			}
+			
 			if (Event.current.control)
 			{
 				var selection = Selection.objects
@@ -112,10 +115,12 @@ namespace LordSheo.Editor.Windows.TSP
 		}
 		private void DoubleClick()
 		{
-			if (Settings.enableEditWithDoubleClick)
+			if (Settings.enableEditWithDoubleClick == false)
 			{
-				AssetDatabase.OpenAsset(asset);
+				return;
 			}
+
+			AssetDatabase.OpenAsset(asset);
 		}
 
 		public Texture GetCurrentIcon()

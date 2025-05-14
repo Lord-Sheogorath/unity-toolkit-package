@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -84,6 +85,15 @@ namespace LordSheo.Editor
 			modifiedCallback?.Invoke();
 		}
 
+		public virtual void MoveChildren(Node<T> parent)
+		{
+			while (children.Count > 0)
+			{
+				var childNode = children[0];
+				parent.AddChild(childNode);
+			}
+		}
+		
 		public virtual void Refresh()
 		{
 			if (value != null)
@@ -128,6 +138,18 @@ namespace LordSheo.Editor
 					yield return subChild;
 				}
 			}
+		}
+
+		public virtual int GetAllChildCount()
+		{
+			var count = 0;
+			
+			foreach (var child in GetAllChildren())
+			{
+				count++;
+			}
+
+			return count;
 		}
 	}
 

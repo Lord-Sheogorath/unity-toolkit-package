@@ -241,9 +241,14 @@ namespace LordSheo.Editor.Windows.TSP
 				return;
 			}
 
-			for (int i = 0; i < dropped.Length; i++)
+			AddAssets(parent, dropped);
+		}
+
+		private void AddAssets(Node<ITreeStyleValue> parent, UnityEngine.Object[] assets)
+		{
+			for (int i = 0; i < assets.Length; i++)
 			{
-				var asset = dropped[i];
+				var asset = assets[i];
 
 				var path = AssetDatabase.GetAssetPath(asset);
 				var guid = AssetDatabase.GUIDFromAssetPath(path);
@@ -260,9 +265,71 @@ namespace LordSheo.Editor.Windows.TSP
 				var node = new Node<ITreeStyleValue>(value);
 
 				parent.AddChild(node);
+				AddFolderAssetContents(node);
 			}
 
 			ForceAllMenuTreeRebuild();
+		}
+
+		private void AddFolderAssetContents(Node<ITreeStyleValue> node, bool rebuild = false)
+		{
+			var asset = node.value as AssetValue;
+			
+			if (AssetDatabase.IsValidFolder(asset.path) == false)
+			{
+				return;
+			}
+
+			var guids = AssetDatabase.FindAssets(null, new string[] { asset.path });
+
+			if (guids.Length == 0)
+			{
+				return;
+			}
+
+			var confirm = EditorUtility.DisplayDialog("TSP - Add Folder Contents", $"Folder '{asset.path}' has {guids.Length} assets", "Add", "Skip");
+
+			if (confirm == false)
+			{
+				return;
+			}
+			
+			var pathToGuid = guids.ToDictionary(g => AssetDatabase.GUIDToAssetPath(g), g => g);
+
+			var paths = pathToGuid.Keys
+				.OrderBy(p => p.Length)
+				.ToArray();
+
+			var nodes = new Dictionary<string, Node<ITreeStyleValue>>();
+			nodes[asset.path] = node;
+
+			foreach (var path in paths)
+			{
+				var split = path.Split("/");
+
+				var assetParentPath = string.Join("/", split.Take(split.Length - 1));
+				var parent = nodes[assetParentPath];
+
+				var guid = pathToGuid[path];
+				
+				var assetValue = new AssetValue()
+				{
+					guid = guid,
+				};
+				
+				assetValue.Refresh();
+				
+				var child = new Node<ITreeStyleValue>(assetValue);
+
+				parent.AddChild(child);
+
+				nodes[path] = child;
+			}
+
+			if (rebuild)
+			{
+				ForceAllMenuTreeRebuild();
+			}
 		}
 
 		public void ForceAllMenuTreeRebuild()

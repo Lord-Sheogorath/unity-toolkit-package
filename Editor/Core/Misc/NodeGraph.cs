@@ -48,7 +48,7 @@ namespace LordSheo.Editor
 			this.value = value;
 		}
 
-		public virtual void AddChild(Node<T> node)
+		public virtual void AddChild(Node<T> node, bool silent = false)
 		{
 			var isSwappingParents = node == parent;
 
@@ -67,10 +67,15 @@ namespace LordSheo.Editor
 			node.parent = this;
 			children.Add(node);
 
+			if (silent)
+			{
+				return;
+			}
+			
 			addedCallback?.Invoke(node);
 			modifiedCallback?.Invoke();
 		}
-		public virtual void RemoveChild(Node<T> node)
+		public virtual void RemoveChild(Node<T> node, bool silent = false)
 		{
 			var removed = children.Remove(node);
 
@@ -80,6 +85,11 @@ namespace LordSheo.Editor
 			}
 
 			node.parent = null;
+
+			if (silent)
+			{
+				return;
+			}
 
 			removedCallback?.Invoke(node);
 			modifiedCallback?.Invoke();

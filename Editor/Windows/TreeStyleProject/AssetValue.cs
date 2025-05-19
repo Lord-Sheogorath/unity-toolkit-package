@@ -21,6 +21,9 @@ namespace LordSheo.Editor.Windows.TSP
 		public string name;
 
 		[JsonIgnore]
+		public string path;
+
+		[JsonIgnore]
 		public UnityEngine.Object asset;
 
 		[JsonIgnore]
@@ -45,8 +48,7 @@ namespace LordSheo.Editor.Windows.TSP
 				assetIcon = null;
 			}
 
-			var path = AssetDatabase.GUIDToAssetPath(guid);
-
+			path = AssetDatabase.GUIDToAssetPath(guid);
 			name = path.Split("/").LastOrDefault();
 			asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(path);
 

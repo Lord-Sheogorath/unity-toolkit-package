@@ -229,8 +229,8 @@ namespace LordSheo.Editor.UI
 				})
 				.Where(i => i.score != null)
 				.OrderByDescending(i => i.score.score)
-				.ThenBy(i => i.item.Name.Length)
 				.ThenBy(i => i.item.Name)
+				.ThenBy(i => i.item.Name.Length)
 				.Select(i => i.item);
 
 			SelectionTree.FlatMenuTree.Clear();
@@ -261,13 +261,19 @@ namespace LordSheo.Editor.UI
 				return primaryContains;
 			}
 
-			var secondaryContains = value.GetSearchStrings()
-				.Any(s => MatchesSearch(item, s));
+			var secondarySearchStrings = value.GetSearchStrings();
+			var secondaryContains = false;
+			
+			foreach (var str in secondarySearchStrings)
+			{
+				var match = MatchesSearch(item, str, 0.25f);
+				secondaryContains |= match;
+			}
 
 			return primaryContains || secondaryContains;
 		}
 
-		protected bool MatchesSearch(OdinMenuItem item, string input)
+		protected bool MatchesSearch(OdinMenuItem item, string input, float mult = 1)
 		{
 			if (item == null)
 			{
@@ -293,11 +299,11 @@ namespace LordSheo.Editor.UI
 
 				_ => throw new NotImplementedException(),
 			};
-
+			
 			info.SetScore(input, new()
 			{
 				contains = contains,
-				score = score,
+				score = Mathf.FloorToInt(score * mult),
 			});
 
 			return contains;
@@ -305,13 +311,30 @@ namespace LordSheo.Editor.UI
 
 		protected bool MatchesFuzzySearch(OdinMenuItem item, string input, out int score)
 		{
-			if (input.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+			if (input.Equals(SearchTerm, StringComparison.OrdinalIgnoreCase))
 			{
-				score = 1;
+				score = 1500;
 				return true;
 			}
-
-			return FuzzySearch.Contains(SearchTerm, input, out score);
+			if (input.StartsWith(SearchTerm, StringComparison.OrdinalIgnoreCase))
+			{
+				score = 1000;
+				return true;
+			}
+			if (input.EndsWith(SearchTerm, StringComparison.OrdinalIgnoreCase))
+			{
+				score = 500;
+				return true;
+			}
+			if (input.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+			{
+				score = 250;
+				return true;
+			}
+			
+			var contains = FuzzySearch.Contains(SearchTerm.ToLower(), input.ToLower(), out score);
+			
+			return contains;
 		}
 		protected bool MatchesRegexSearch(OdinMenuItem item, string input, out int score)
 		{

@@ -17,8 +17,8 @@ namespace LordSheo.Editor
 		{
 			// WARNING: Fixes an issue when deserialising already
 			// populated lists. Without setting this the default
-			// behaviour is the merge the existing values with the
-			// the new values.
+			// behaviour is to merge the existing values with the
+			// new values.
 			ObjectCreationHandling = ObjectCreationHandling.Replace,
 		};
 

@@ -261,10 +261,21 @@ namespace LordSheo.Editor.Windows.TSP
 				};
 
 				value.Refresh();
-
 				var node = new Node<ITreeStyleValue>(value);
 
-				parent.AddChild(node);
+				// Handle trying to add the same asset at the same level
+				// multiple times and still prompt user to add folder contents.
+				var duplicateChildNode = parent.children.FirstOrDefault(c => c.value.Name == value.Name);
+				
+				if (duplicateChildNode != null)
+				{
+					node = duplicateChildNode;
+				}
+				else
+				{
+					parent.AddChild(node);
+				}
+
 				AddFolderAssetContents(node);
 			}
 

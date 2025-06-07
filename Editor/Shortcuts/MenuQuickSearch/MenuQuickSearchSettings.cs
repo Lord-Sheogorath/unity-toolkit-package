@@ -2,6 +2,7 @@
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace LordSheo.Editor.Shortcuts
 {
@@ -11,6 +12,8 @@ namespace LordSheo.Editor.Shortcuts
 
 		public bool showMenuPathsAsNames = false;
 		public int maxRecentMenuLength = 10;
+		[Tooltip("Assets created with MenuQuickSearch may serialise incorrectly, force an asset database save & refresh")]
+		public bool forceAssetSaveAndRefreshAfterConfirm = true;
 		public List<StringMatch> ignoredMenuMatches = new();
 
 		public bool IsValid(ScriptingMenuItemProxy item)

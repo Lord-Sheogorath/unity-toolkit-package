@@ -26,25 +26,40 @@ namespace LordSheo.Editor.Shortcuts
 				return;
 			}
 
-			var prevWindows = Resources.FindObjectsOfTypeAll<EditorWindow>();
-
-			Selection.objects = selectedObjects;
-
-			foreach (var menu in selectedMenus)
+			try
 			{
-				EditorApplication.ExecuteMenuItem(menu);
+				var prevWindows = Resources.FindObjectsOfTypeAll<EditorWindow>();
+
+				Selection.objects = selectedObjects;
+
+				foreach (var menu in selectedMenus)
+				{
+					EditorApplication.ExecuteMenuItem(menu);
+				}
+
+				var newWindows = Resources.FindObjectsOfTypeAll<EditorWindow>();
+
+				var openedWindow = newWindows
+					.Except(prevWindows)
+					.FirstOrDefault();
+
+				EditorApplicationUtility.ForceFocusWindow(openedWindow);
+
+				selectedMenus = null;
+				selectedObjects = null;
 			}
-
-			var newWindows = Resources.FindObjectsOfTypeAll<EditorWindow>();
-
-			var openedWindow = newWindows
-				.Except(prevWindows)
-				.FirstOrDefault();
-
-			EditorApplicationUtility.ForceFocusWindow(openedWindow);
-
-			selectedMenus = null;
-			selectedObjects = null;
+			catch (Exception e)
+			{
+				Debug.LogException(e);
+			}
+			
+			if (Settings.forceAssetSaveAndRefreshAfterConfirm)
+			{
+				// FIX: Potential fix for created assets losing references
+				// to other assets due to weird serialisation issues.
+				AssetDatabase.SaveAssets();
+				AssetDatabase.Refresh();
+			}
 		}
 
 		[Shortcut(ConstValues.NAMESPACE_PATH + "Menu/QuickSearch", KeyCode.Period, ShortcutModifiers.Control)]

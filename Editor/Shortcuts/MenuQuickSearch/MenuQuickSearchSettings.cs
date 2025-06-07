@@ -10,6 +10,7 @@ namespace LordSheo.Editor.Shortcuts
 		public static MenuQuickSearchSettings Instance => EditorSettings.GetSettings<MenuQuickSearchSettings>();
 
 		public bool showMenuPathsAsNames = false;
+		public int maxRecentMenuLength = 10;
 		public List<StringMatch> ignoredMenuMatches = new();
 
 		public bool IsValid(ScriptingMenuItemProxy item)

@@ -12,6 +12,8 @@ namespace LordSheo.Editor.Shortcuts
 {
 	public static class MenuQuickSearchShortcut
 	{
+		public static readonly List<string> recentConfirmedMenus = new();
+		
 		public static string[] selectedMenus;
 		public static UnityEngine.Object[] selectedObjects;
 
@@ -50,11 +52,14 @@ namespace LordSheo.Editor.Shortcuts
 		{
 			selectedObjects = Selection.objects;
 
-			// NOTE: Can cache this
-			var menus = MenuProxy.cachedMenuRoots
+			var hardMenuRefs = MenuProxy.cachedMenuRoots
 				.SelectMany(m => MenuProxy.GetMenuItems(m, true, true))
 				.Where(m => m != null && Menu.GetEnabled(m.path))
 				.Where(m => MenuProxy.MenuItemExists(m.path))
+				.ToList();
+			
+			// NOTE: Can cache this
+			var menus = hardMenuRefs
 				.Where(m => Settings.IsValid(m))
 
 				// NOTE: Remove open windows toolbar thingy
@@ -64,7 +69,19 @@ namespace LordSheo.Editor.Shortcuts
 
 			var items = menus
 				.Select(m => new GenericSelectorItem<StringSearch>(m.path, m.path))
-				.ToArray();
+				.ToList();
+
+			if (recentConfirmedMenus.Count > 0)
+			{
+				for (int i = recentConfirmedMenus.Count - 1; i >= 0; i--)
+				{
+					var recentConfirmedMenu = recentConfirmedMenus[i];
+					var recentConfirmMenuDisplayName = "Recent/" + recentConfirmedMenu.Split("/").Last();
+					var recentConfirmedMenuItem = new GenericSelectorItem<StringSearch>(recentConfirmMenuDisplayName, recentConfirmedMenu);
+					
+					items.Insert(0, recentConfirmedMenuItem);
+				}
+			}
 
 			var menu = new BetterGenericSelector<StringSearch>(null, false, items);
 			menu.showItemPathsAsNames = Settings.showMenuPathsAsNames;
@@ -81,6 +98,28 @@ namespace LordSheo.Editor.Shortcuts
 			selectedMenus = selection.Select(s => s.value).ToArray();
 
 			EditorApplicationUtility.AddNextUpdateCallback(OnNextUpdate);
+
+			if (Settings.maxRecentMenuLength == 0)
+			{
+				recentConfirmedMenus.Clear();
+				return;
+			}
+			
+			foreach (var selected in selectedMenus)
+			{
+				recentConfirmedMenus.Remove(selected);
+				recentConfirmedMenus.Insert(0, selected);
+			}
+
+			if (Settings.maxRecentMenuLength < 0)
+			{
+				return;
+			}
+			
+			while (recentConfirmedMenus.Count > Settings.maxRecentMenuLength)
+			{
+				recentConfirmedMenus.RemoveAt(recentConfirmedMenus.Count - 1);
+			}
 		}
 	}
 }

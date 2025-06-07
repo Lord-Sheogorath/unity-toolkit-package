@@ -2,103 +2,67 @@
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using UnityEditor;
 using UnityEngine;
 
 namespace LordSheo.Editor
 {
-	public interface IDefaultEditorSettings<T>
-	{
-		public T Create();
-	}
-
 	public static class EditorSettings
 	{
-		public static readonly JsonSerializerSettings jsonSettings = new()
-		{
-			// WARNING: Fixes an issue when deserialising already
-			// populated lists. Without setting this the default
-			// behaviour is to merge the existing values with the
-			// new values.
-			ObjectCreationHandling = ObjectCreationHandling.Replace,
-		};
+		public static readonly Dictionary<Type, EditorSettingsAsset> settings = new();
 
-		public static readonly Dictionary<Type, object> settings = new();
-
-		public static T GetSettings<T>(IDefaultEditorSettings<T> fallback)
+		public static T GetSettings<T>(IDefaultEditorSettings<T> fallback = null)
+			where T : EditorSettingsAsset
 		{
+			if (fallback == null)
+			{
+				fallback = new DefaultEditorSettings<T>();
+			}
+			
 			var type = typeof(T);
+			var name = type.Name;
 
 			if (EditorSettings.settings.TryGetValue(type, out var value))
 			{
-				return (T)value;
-			}
-
-			var json = EditorProject.prefs.GetString(type.Name, string.Empty);
-			var settings = default(T);
-			var valid = false;
-
-			if (string.IsNullOrEmpty(json) == false)
-			{
-				try
+				if (value != null)
 				{
-					settings = DeserialiseSettings<T>(json);
-					valid = true;
+					return (T)value;
 				}
-				catch (System.Exception e)
-				{
-					Debug.LogException(e);
-				}
+				
+				Debug.LogError("NullSettings: " + name);
 			}
 
-			if (valid == false)
+			var asset = Resources.Load<T>("LordSheo/Settings/" + name);
+
+			if (asset == null)
 			{
-				settings = fallback.Create();
+				var path = "Assets/Resources/LordSheo/Settings";
+				AssetDatabaseUtil.CreateDirectory(path);
+				
+				asset = fallback.Create();
+				
+				AssetDatabase.CreateAsset(asset, $"{path}/{name}.asset");
+				AssetDatabase.SaveAssets();
+				AssetDatabase.Refresh();
 			}
 
-			EditorSettings.settings[type] = settings;
-
-			return settings;
-		}
-		public static string GetSerialisedSettings<T>(IDefaultEditorSettings<T> fallback)
-		{
-			return SerialiseSettings(GetSettings(fallback));
+			EditorSettings.settings[type] = asset;
+			
+			return asset;
 		}
 
 		public static void SetSettings<T>(T settings)
+			where T : EditorSettingsAsset
 		{
 			try
 			{
 				var type = typeof(T);
 				EditorSettings.settings[type] = settings;
-
-				var json = SerialiseSettings(settings);
-				EditorProject.prefs.SetString(type.Name, json);
 			}
 			catch (System.Exception e)
 			{
 				Debug.LogException(e);
 			}
-		}
-		public static void SetSerialisedSettings<T>(string json)
-		{
-			try
-			{
-				var settings = JsonConvert.DeserializeObject<T>(json, jsonSettings);
-				SetSettings(settings);
-			}
-			catch (System.Exception e)
-			{
-				Debug.LogException(e);
-			}
-		}
-
-		public static T DeserialiseSettings<T>(string json)
-		{
-			return JsonConvert.DeserializeObject<T>(json, jsonSettings);
-		}
-		public static string SerialiseSettings<T>(T settings)
-		{
-			return JsonConvert.SerializeObject(settings, jsonSettings);
 		}
 	}
 }

@@ -1,26 +1,13 @@
 ﻿using UnityEditor;
+using UnityEngine;
 
 namespace LordSheo.Editor.Windows.TSP
 {
-	public class TreeStyleProjectSettings
+	public class TreeStyleProjectSettings : EditorSettingsAsset
 	{
-		private struct DefaultSettings : IDefaultEditorSettings<TreeStyleProjectSettings>
-		{
-			public TreeStyleProjectSettings Create()
-			{
-				return new();
-			}
-		}
-
-		public static TreeStyleProjectSettings Instance => EditorSettings.GetSettings(new DefaultSettings());
+		public static TreeStyleProjectSettings Instance => EditorSettings.GetSettings<TreeStyleProjectSettings>();
 
 		public bool deleteChildrenWithParent = true;
 		public bool enableEditWithDoubleClick = true;
-
-		[SettingsProvider]
-		private static SettingsProvider GetSettings()
-		{
-			return EditorSettingsProvider<TreeStyleProjectSettings>.Create(new DefaultSettings());
-		}
 	}
 }

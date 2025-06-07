@@ -5,16 +5,9 @@ using UnityEngine;
 
 namespace LordSheo.Editor.Shortcuts
 {
-	public class MenuQuickSearchSettings
+	public class MenuQuickSearchSettings : EditorSettingsAsset
 	{
-		private struct DefaultSettings : IDefaultEditorSettings<MenuQuickSearchSettings>
-		{
-			public MenuQuickSearchSettings Create()
-			{
-				return new MenuQuickSearchSettings();
-			}
-		}
-		public static MenuQuickSearchSettings Instance => EditorSettings.GetSettings<MenuQuickSearchSettings>(new DefaultSettings());
+		public static MenuQuickSearchSettings Instance => EditorSettings.GetSettings<MenuQuickSearchSettings>();
 
 		public bool showMenuPathsAsNames = false;
 		public List<StringMatch> ignoredMenuMatches = new();
@@ -30,12 +23,6 @@ namespace LordSheo.Editor.Shortcuts
 			}
 
 			return true;
-		}
-
-		[SettingsProvider]
-		private static SettingsProvider GetSettings()
-		{
-			return EditorSettingsProvider<MenuQuickSearchSettings>.Create(new DefaultSettings());
 		}
 	}
 }

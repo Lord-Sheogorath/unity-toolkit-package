@@ -5,19 +5,11 @@ using UnityEngine;
 
 namespace LordSheo.Editor.Tools
 {
-	public class AssetModificationConfirmationSettings
+	public class AssetModificationConfirmationSettings : EditorSettingsAsset
 	{
-		private struct DefaultSettings : IDefaultEditorSettings<AssetModificationConfirmationSettings>
-		{
-			public AssetModificationConfirmationSettings Create()
-			{
-				return new();
-			}
-		}
-
 		private const string DISABLE_SESSION_CONFIRMATION = "AMCS_DisableSessionConfirmation";
 
-		public static AssetModificationConfirmationSettings Instance => EditorSettings.GetSettings(new DefaultSettings());
+		public static AssetModificationConfirmationSettings Instance => EditorSettings.GetSettings<AssetModificationConfirmationSettings>();
 
 		public bool enabled = true;
 
@@ -43,12 +35,6 @@ namespace LordSheo.Editor.Tools
 		{
 			get => SessionState.GetBool(DISABLE_SESSION_CONFIRMATION, false);
 			set => SessionState.SetBool(DISABLE_SESSION_CONFIRMATION, value);
-		}
-
-		[SettingsProvider]
-		private static SettingsProvider GetSettings()
-		{
-			return EditorSettingsProvider<AssetModificationConfirmationSettings>.Create(new DefaultSettings());
 		}
 	}
 }

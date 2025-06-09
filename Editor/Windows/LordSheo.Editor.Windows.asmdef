@@ -2,6 +2,7 @@
     "name": "LordSheo.Editor.Windows",
     "rootNamespace": "LordSheo.Editor.Windows",
     "references": [
+        "GUID:a502d0953e4eaf24f87bbe89f4d3e300",
         "GUID:459b18c3d2949bf4bbc84d53f9280c40"
     ],
     "includePlatforms": [

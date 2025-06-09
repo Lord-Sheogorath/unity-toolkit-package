@@ -1,7 +1,4 @@
-﻿using UnityEditor;
-using UnityEngine;
-
-namespace LordSheo.Editor.Windows.TSP
+﻿namespace LordSheo.Editor.Windows.TSP
 {
 	public class TreeStyleProjectSettings : EditorSettingsAsset
 	{

@@ -4,7 +4,7 @@ using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 using UnityEngine;
 
-namespace LordSheo.Editor.Core
+namespace LordSheo.Editor
 {
     public class EditorSettingsPreferencesProvider
     {

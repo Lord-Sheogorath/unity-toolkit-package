@@ -1,7 +1,5 @@
-﻿using UnityEditor;
-using System.Reflection;
+﻿using System.Reflection;
 using System;
-using UnityEngine;
 
 namespace LordSheo.Editor
 {

@@ -16,13 +16,13 @@ namespace LordSheo.Editor
 			Regex,
 		}
 
-		[FoldoutGroup("@ToDisplayString()")]
+		[FoldoutGroup("@" + nameof(ToDisplayString) + "()")]
 		public string pattern;
-		[FoldoutGroup("@ToDisplayString()")]
+		[FoldoutGroup("@" + nameof(ToDisplayString) + "()")]
 		public Mode mode;
-		[FoldoutGroup("@ToDisplayString()")]
+		[FoldoutGroup("@" + nameof(ToDisplayString) + "()")]
 		public bool invert;
-		[FoldoutGroup("@ToDisplayString()")]
+		[FoldoutGroup("@" + nameof(ToDisplayString) + "()")]
 		public bool ignoreCase = true;
 
 		public bool IsMatch(string text)

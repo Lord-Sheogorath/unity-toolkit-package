@@ -1,7 +1,9 @@
 {
-    "name": "LordSheo.Editor.Core",
-    "rootNamespace": "LordSheo.Editor.Core",
-    "references": [],
+    "name": "LordSheo.Editor",
+    "rootNamespace": "LordSheo.Editor",
+    "references": [
+        "GUID:a502d0953e4eaf24f87bbe89f4d3e300"
+    ],
     "includePlatforms": [
         "Editor"
     ],

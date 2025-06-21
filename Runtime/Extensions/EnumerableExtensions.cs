@@ -18,6 +18,19 @@ namespace LordSheo
 			}
 		}
 
+		public static T Random<T>(this IList<T> source)
+		{
+			var index = UnityEngine.Random.Range(0, source.Count - 1);
+			return source[index];
+		}
+		public static void AddRange<T>(HashSet<T> source, IEnumerable<T> collection)
+		{
+			foreach (var elem in collection)
+			{
+				source.Add(elem);
+			}
+		}
+
 		public static TValue GetOrAddDefault<TKey, TValue>(this IDictionary<TKey, TValue> source, TKey key, TValue defaultValue = default)
 		{
 			if (source.TryGetValue(key, out var value) == false)

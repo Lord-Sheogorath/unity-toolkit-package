@@ -2,49 +2,32 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening.Plugins.Core.PathCore;
 using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using LordSheo;
+using Newtonsoft.Json;
 using Sirenix.OdinInspector;
 using Sirenix.Utilities.Editor;
+using UnityEngine.Serialization;
 using UPMClient = UnityEditor.PackageManager.Client;
 
 namespace LordSheo.Editor.GitSpoon
 {
 	public class GitSpoonWindow : OdinMenuEditorWindow
 	{
-		public class GitSpoonManifest
-		{
-			public string name;
-			public string displayName;
-			public string version;
-			public string description;
-			public string author;
-			
-			public string url;
-		}
-
-		private static List<GitSpoonManifest> manifests = new()
-		{
-			new GitSpoonManifest()
-			{
-				name = "com.lord-sheo.toolkit",
-				displayName = "Unity Toolkit Package",
-				author = "Lord Sheo",
-				version = "1.0.0",
-				url = "https://github.com/Lord-Sheogorath/unity-toolkit-package"
-			},
-		};
+		private static List<GitSpoonManifest> manifests = new();
 
 		private ListRequest _listPackagesRequest;
-		
+
 		[MenuItem("Window/LordSheo/GitSpoon")]
 		public static void Open()
 		{
-			CreateWindow<GitSpoonWindow>("Git Spoon");
+			CreateWindow<GitSpoonWindow>("Git Spoon")
+				.Refresh();
 		}
 
 		[InitializeOnLoadMethod]
@@ -59,7 +42,7 @@ namespace LordSheo.Editor.GitSpoon
 			{
 				return;
 			}
-			
+
 			var now = DateTime.UtcNow;
 
 			if (forceIfNoneOpen == false)
@@ -76,51 +59,91 @@ namespace LordSheo.Editor.GitSpoon
 			}
 
 			EditorProject.projectOnlyPrefs.SetString("git_spoon_prompt", now.ToString());
-				
-			EditorApplicationUtility.DisplayConfirmAction("GitSpoon - Open Window", "Would you like to open a new GitSpoon window?", () =>
-			{
-				Open();
-			});
+
+			EditorApplicationUtility.DisplayConfirmAction("GitSpoon - Open Window", "Would you like to open a new GitSpoon window?", () => { Open(); });
 		}
 
 		protected override void OnImGUI()
 		{
 			base.OnImGUI();
 
-			if (_listPackagesRequest != null)
+			if (Event.current.IsKeyUp(KeyCode.F5))
 			{
-				if (_listPackagesRequest.IsCompleted)
-				{
-					foreach (var manifest in manifests)
-					{
-						var path = $"{manifest.author}/{manifest.displayName}";
-						var item = MenuTree.GetMenuItem(path);
+				Refresh();
+				return;
+			}
 
-						item.Icon = _listPackagesRequest.Result.Any(p => p.packageId == manifest.name) 
-							? EditorIcons.Checkmark.Active 
-							: EditorIcons.Download.Active;
-					}
-				}
-				else if (_listPackagesRequest.Error != null)
-				{
-					Debug.LogError(_listPackagesRequest.Error.message);
-				}
+			// foreach (var manifest in manifests)
+			// {
+			// 	var path = $"{manifest.author}/{manifest.displayName}";
+			// 	var item = MenuTree.GetMenuItem(path);
+			// }
+
+			if (_listPackagesRequest != null && _listPackagesRequest.Error != null)
+			{
+				Debug.LogError(_listPackagesRequest.Error.message);
+				_listPackagesRequest = null;
 			}
 		}
-
+		
 		protected override OdinMenuTree BuildMenuTree()
 		{
-			_listPackagesRequest = UPMClient.List(true);
-
 			var tree = new OdinMenuTree();
+
+			tree.Add("Settings/Sources", GitSpoonManifestSourceSettings.Instance);
+
+			manifests.Clear();
+
+			foreach (var source in GitSpoonManifestSourceSettings.Instance.sources)
+			{
+				if (source.IsAsset)
+				{
+					var json = source.asset.text;
+					var localManifests = JsonConvert.DeserializeObject<List<GitSpoonManifest>>(json);
+
+					manifests.AddRange(localManifests);
+				}
+
+				// TO-DO: Handle git URL
+			}
 
 			foreach (var manifest in manifests)
 			{
 				var path = $"{manifest.author}/{manifest.displayName}";
 				tree.Add(path, manifest);
+
+				var item = tree.GetMenuItem(path);
+				SetIconGetter(manifest, path, item);
 			}
 
 			return tree;
+		}
+		
+		private void SetIconGetter(GitSpoonManifest manifest, string path, OdinMenuItem item)
+		{
+			item.IconGetter = () =>
+			{
+				if (_listPackagesRequest == null || _listPackagesRequest.IsCompleted == false)
+				{
+					if (_listPackagesRequest.Error != null)
+					{
+						return EditorIcons.UnityErrorIcon;
+					}
+
+					return EditorIcons.LoadingBar.Active;
+				}
+
+				return _listPackagesRequest.Result.Any(p => p.packageId == manifest.name)
+					? EditorIcons.Checkmark.Active
+					: EditorIcons.Download.Active;
+			};
+		}
+
+		public void Refresh()
+		{
+			// TO-DO: Move this somewhere better
+			_listPackagesRequest = UPMClient.List(true);
+			ForceMenuTreeRebuild();
 		}
 	}
 }

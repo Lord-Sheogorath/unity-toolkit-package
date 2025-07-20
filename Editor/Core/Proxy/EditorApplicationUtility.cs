@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -94,6 +95,14 @@ namespace LordSheo.Editor
 			}
 			
 			action?.Invoke();
+		}
+
+		public static bool IsWindowOpen<T>()
+			where T : EditorWindow
+		{
+			return Resources.FindObjectsOfTypeAll<EditorWindow>()
+				.OfType<T>()
+				.Any();
 		}
 	}
 }

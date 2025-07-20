@@ -1,0 +1,17 @@
+﻿using Newtonsoft.Json;
+
+namespace LordSheo
+{
+	public static class JsonExtensions
+	{
+		public static string Serialize(object value, JsonSerializerSettings settings = null)
+		{
+			return JsonConvert.SerializeObject(value, settings);
+		}
+
+		public static T Deserialize<T>(string value, JsonSerializerSettings settings = null)
+		{
+			return JsonConvert.DeserializeObject<T>(value, settings);
+		}
+	}
+}

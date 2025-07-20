@@ -21,6 +21,8 @@ namespace LordSheo.Editor.Tools
 		public bool fileConfirmation = true;
 		[PropertyOrder(1)]
 		public bool renameConfirmation = true;
+		[PropertyOrder(1)]
+		public bool moveConfirmation = true;
 
 		[Space]
 

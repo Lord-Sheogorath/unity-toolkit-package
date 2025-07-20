@@ -39,6 +39,10 @@ namespace LordSheo.Editor.Tools
 				{
 					return AssetMoveResult.DidNotMove;
 				}
+				else if (type == Type.Move && Settings.moveConfirmation == false)
+				{
+					return AssetMoveResult.DidNotMove;
+				}
 
 				var showConfirmation = false;
 

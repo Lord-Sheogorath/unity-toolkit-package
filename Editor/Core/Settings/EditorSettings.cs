@@ -9,6 +9,12 @@ namespace LordSheo.Editor
 	{
 		public static readonly Dictionary<Type, EditorSettingsAsset> settings = new();
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="fallback">If no settings object exists, use this to create one and save it to Resources.</param>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
 		public static T GetSettings<T>(IDefaultEditorSettings<T> fallback = null)
 			where T : EditorSettingsAsset
 		{

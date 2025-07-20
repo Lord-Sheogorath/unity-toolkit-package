@@ -1,6 +1,6 @@
 {
-    "name": "LordSheo",
-    "rootNamespace": "LordSheo",
+    "name": "LordSheo.Runtime",
+    "rootNamespace": "LordSheo.Runtime",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -10,6 +10,7 @@ using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using LordSheo;
 using Newtonsoft.Json;
+using PlasticGui.WorkspaceWindow.Items;
 using Sirenix.OdinInspector;
 using Sirenix.Utilities.Editor;
 using UnityEngine.Serialization;
@@ -61,6 +62,35 @@ namespace LordSheo.Editor.GitSpoon
 			EditorProject.projectOnlyPrefs.SetString("git_spoon_prompt", now.ToString());
 
 			EditorApplicationUtility.DisplayConfirmAction("GitSpoon - Open Window", "Would you like to open a new GitSpoon window?", () => { Open(); });
+		}
+
+		public static List<GitSpoonManifest.Dependency> GetDependencies(List<GitSpoonManifest> manifests, GitSpoonManifest root, HashSet<string> checkedDependencies = null)
+		{
+			checkedDependencies ??= new();
+			var rootDependencies = new List<GitSpoonManifest.Dependency>();
+
+			foreach (var rootDependency in root.dependencies)
+			{
+				if (checkedDependencies.Add(rootDependency.id) == false)
+				{
+					continue;
+				}
+				
+				rootDependencies.Add(rootDependency);
+				
+				var childManifest = manifests.FirstOrDefault(m => m.name == rootDependency.id);
+
+				if (childManifest == null)
+				{
+					continue;
+				}
+				
+				var childDependencies = GetDependencies(manifests, childManifest, checkedDependencies);
+
+				rootDependencies.AddRange(childDependencies);
+			}
+			
+			return rootDependencies;
 		}
 
 		protected override void OnImGUI()

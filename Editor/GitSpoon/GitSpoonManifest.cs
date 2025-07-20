@@ -18,12 +18,12 @@ namespace LordSheo.Editor.GitSpoon
 			
 			public string id;
 			public Source source;
-			public string minVersion;
+			public SemanticVersion minVersion;
 		}
 
 		public string name;
 		public string displayName;
-		public string version;
+		public SemanticVersion version;
 		public string description;
 		public string author;
 			

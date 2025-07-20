@@ -1,9 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Text.RegularExpressions;
 using Sirenix.OdinInspector;
 
-namespace LordSheo.Editor
+namespace LordSheo
 {
 	[System.Serializable]
 	public class StringMatch

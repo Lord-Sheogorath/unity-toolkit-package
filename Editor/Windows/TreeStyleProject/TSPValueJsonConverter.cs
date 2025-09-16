@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace LordSheo.Editor.Windows.TSP
 {
-	public class TSPJsonConverter : JsonConverter
+	public class TSPValueJsonConverter : JsonConverter
 	{
 		public override bool CanConvert(Type objectType)
 		{
@@ -14,44 +14,41 @@ namespace LordSheo.Editor.Windows.TSP
 
 		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
 		{
-			var jo = new JObject();
+			var jObject = new JObject();
 
-			var val = value as ITreeStyleValue;
 			var type = value.GetType();
-
 			var guid = TypeGuidUtil.GetGuid(type).guid;
 			
-			jo.Add("T", guid);
-			jo.Add("V", JObject.FromObject(value));
+			jObject.Add("T", guid);
+			jObject.Add("V", JObject.FromObject(value));
 
-			jo.WriteTo(writer);
+			jObject.WriteTo(writer);
 		}
 
 		public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
 		{
 			if (reader.TokenType == JsonToken.Null)
 			{
-				return new InvalidValue(null);
+				return new TSPInvalidValue(null);
 			}
 
-			var jo = JObject.Load(reader);
+			var jObject = JObject.Load(reader);
 
-			var guid = jo["T"].ToString();
-			var json = jo["V"].ToString();
+			var guid = jObject["T"].ToString();
+			var json = jObject["V"].ToString();
 
 			try
 			{
 				var type = TypeGuidUtil.GetType(guid);
+				var value = JsonConvert.DeserializeObject(json, type);
 
-				var asset = JsonConvert.DeserializeObject(json, type);
-
-				return asset as ITreeStyleValue;
+				return value as ITreeStyleValue;
 			}
 			catch (System.Exception e)
 			{
 				Debug.LogException(e);
 
-				return new InvalidValue(jo);
+				return new TSPInvalidValue(jObject);
 			}
 		}
 	}

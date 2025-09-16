@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
@@ -39,7 +40,7 @@ namespace LordSheo.Editor.Windows.TSP
 			{
 				Converters = new List<JsonConverter>()
 				{
-					new TSPJsonConverter()
+					new TSPValueJsonConverter()
 				}
 			};
 			serialiser = new(settings);
@@ -156,6 +157,16 @@ namespace LordSheo.Editor.Windows.TSP
 				GUIUtility.systemCopyBuffer = serialiser.Serialise(graph);
 			}
 
+			if (SirenixEditorGUI.ToolbarButton(SdfIconType.Plus))
+			{
+				graph.AddChild(new()
+				{
+					value = new TSPCustomValue()
+				});
+				
+				ForceAllMenuTreeRebuild();
+			}
+
 			GUILayout.FlexibleSpace();
 
 			if (SirenixEditorGUI.ToolbarButton("Refresh"))
@@ -192,6 +203,14 @@ namespace LordSheo.Editor.Windows.TSP
 			var rect = GUILayoutUtility.GetLastRect();
 
 			HandleMenuDropZone(rect);
+		}
+
+		protected override void OnAddVisualNode(Node<ITreeStyleValue> node, OdinMenuItem item)
+		{
+			node.value.ModifiedCallback -= SetWindowDirty;
+			node.value.ModifiedCallback += SetWindowDirty;
+			
+			base.OnAddVisualNode(node, item);
 		}
 
 		private void HandleMenuDropZone(Rect rect)
@@ -255,7 +274,7 @@ namespace LordSheo.Editor.Windows.TSP
 
 				Debug.Log(path);
 
-				var value = new AssetValue()
+				var value = new TSPAssetValue()
 				{
 					guid = guid.ToString()
 				};
@@ -284,7 +303,7 @@ namespace LordSheo.Editor.Windows.TSP
 
 		private void AddFolderAssetContents(Node<ITreeStyleValue> node, bool rebuild = false)
 		{
-			var asset = node.value as AssetValue;
+			var asset = node.value as TSPAssetValue;
 			
 			if (AssetDatabase.IsValidFolder(asset.path) == false)
 			{
@@ -323,7 +342,7 @@ namespace LordSheo.Editor.Windows.TSP
 
 				var guid = pathToGuid[path];
 				
-				var assetValue = new AssetValue()
+				var assetValue = new TSPAssetValue()
 				{
 					guid = guid,
 				};

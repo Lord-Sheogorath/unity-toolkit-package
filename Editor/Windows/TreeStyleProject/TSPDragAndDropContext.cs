@@ -6,7 +6,7 @@ namespace LordSheo.Editor.Windows.TSP
 	// NOTE: We want to modify the dragged list when moving between the TreeStyleProjectWindow
 	// and any other window. Since we don't care about Nodes outside the TSPWindow we want
 	// to instead use their asset reference if they have one.
-	public static class DragAndDropTSPContext
+	public static class TSPDragAndDropContext
 	{
 		private static readonly Dictionary<UnityEngine.Object, Node<ITreeStyleValue>> draggedNodeReferences = new();
 		
@@ -45,7 +45,7 @@ namespace LordSheo.Editor.Windows.TSP
 						continue;
 					}
 
-					var assetValue = node.value as AssetValue;
+					var assetValue = node.value as TSPAssetValue;
 
 					if (assetValue == null || assetValue.asset == null)
 					{

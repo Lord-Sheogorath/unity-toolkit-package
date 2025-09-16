@@ -10,7 +10,7 @@ using UnityEngine;
 namespace LordSheo.Editor.Windows.TSP
 {
 	[TypeGuid("3F409B29-2BE5-45CF-8B0C-DB129EFAE616")]
-	public class AssetValue : ITreeStyleValue
+	public class TSPAssetValue : ITreeStyleValue
 	{
 		[JsonIgnore]
 		public TreeStyleProjectSettings Settings => TreeStyleProjectSettings.Instance;
@@ -32,6 +32,8 @@ namespace LordSheo.Editor.Windows.TSP
 		[JsonIgnore]
 		public Texture Icon => GetCurrentIcon();
 
+		public event Action ModifiedCallback;
+		
 		private Texture assetIcon;
 
 		public bool IsValid()
@@ -56,6 +58,10 @@ namespace LordSheo.Editor.Windows.TSP
 		}
 
 		public void Select()
+		{
+		}
+
+		public void Deselect()
 		{
 		}
 

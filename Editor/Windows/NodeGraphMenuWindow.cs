@@ -19,6 +19,8 @@ namespace LordSheo.Editor.Windows
 		
 		protected NodeGraph<T> graph;
 
+		protected List<T> selectedNodeValues = new();
+		
 		protected JsonSerializerSettings settings;
 		protected NodeGraphSerialiser<T> serialiser;
 
@@ -163,7 +165,6 @@ namespace LordSheo.Editor.Windows
 				}
 			}
 		}
-
 		protected virtual void HandleParentControls(OdinMenuItem[] selectedItems)
 		{
 			var parentIndexOffset = 0;
@@ -286,12 +287,15 @@ namespace LordSheo.Editor.Windows
 				tree.Config.DrawSearchToolbar = true;
 				tree.Selection.SelectionChanged += OnSelectionChanged;
 
+				graph.modifiedCallback -= SetWindowDirty;
+				graph.modifiedCallback += SetWindowDirty;
+				
 				foreach (var child in graph.children)
 				{
 					try
 					{
-						var parent = AddNode(tree, child, "");
-						AddChildren(tree, child, parent);
+						var parent = AddVisualNode(tree, child, "");
+						AddVisualNodeChildren(tree, child, parent);
 					}
 					catch (Exception e)
 					{
@@ -309,30 +313,53 @@ namespace LordSheo.Editor.Windows
 
 		protected virtual void OnSelectionChanged(SelectionChangedType type)
 		{
+			// NOTE: Odin is super jank and will call ItemRemoved before
+			// ItemAdded so it's pretty unreliable.
+			
 			if (type == SelectionChangedType.ItemAdded)
 			{
-				var nodes = MenuTree.Selection.SelectedValues
+				var currentlySelectedNodeValues = MenuTree.Selection.SelectedValues
 					.OfType<Node<T>>()
 					.Select(n => n.value);
 
-				foreach (var value in nodes)
+				foreach (var value in currentlySelectedNodeValues)
 				{
 					value.Select();
 				}
+				
+				selectedNodeValues.Clear();
+				selectedNodeValues.AddRange(currentlySelectedNodeValues);
+			}
+			else
+			{
+				var currentlySelectedNodeValues= MenuTree.Selection.SelectedValues
+					.OfType<Node<T>>()
+					.Select(n => n.value);
+				
+				var deselectedNodeValues = selectedNodeValues
+					.Except(currentlySelectedNodeValues);
+
+				foreach (var value in deselectedNodeValues)
+				{
+					value.Deselect();
+				}
+				
+				selectedNodeValues.Clear();
+				selectedNodeValues.AddRange(currentlySelectedNodeValues);
 			}
 		}
 
-		protected virtual void AddChildren(OdinMenuTree tree, Node<T> root, string parent)
+		protected virtual void AddVisualNodeChildren(OdinMenuTree tree, Node<T> root, string parent)
 		{
 			foreach (var node in root.children)
 			{
-				var name = AddNode(tree, node, parent);
+				var name = AddVisualNode(tree, node, parent);
 
-				AddChildren(tree, node, name);
+				AddVisualNodeChildren(tree, node, name);
 			}
 		}
 
-		protected virtual string AddNode(OdinMenuTree tree, Node<T> node, string parent)
+		protected virtual string AddVisualNode(OdinMenuTree tree, Node<T> node, string parent)
 		{
 			var name = "[Missing] " + node.value.Name;
 
@@ -354,7 +381,7 @@ namespace LordSheo.Editor.Windows
 
 			item.IconGetter = GetItemIcon;
 
-			OnAddNode(node, item);
+			OnAddVisualNode(node, item);
 
 			return path;
 
@@ -371,7 +398,7 @@ namespace LordSheo.Editor.Windows
 			}
 		}
 
-		protected virtual void OnAddNode(Node<T> node, OdinMenuItem item)
+		protected virtual void OnAddVisualNode(Node<T> node, OdinMenuItem item)
 		{
 			item.OnDrawItem += OnDrawMenuItem;
 

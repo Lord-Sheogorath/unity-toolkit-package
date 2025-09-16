@@ -14,6 +14,7 @@ namespace LordSheo.Editor
 		
 		bool IsValid();
 		void Select();
+		void Deselect();
 		void Refresh();
 	}
 

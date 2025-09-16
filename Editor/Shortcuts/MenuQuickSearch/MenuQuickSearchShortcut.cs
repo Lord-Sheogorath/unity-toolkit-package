@@ -7,15 +7,20 @@ using UnityEditor;
 using Sirenix.OdinInspector.Editor;
 using System;
 using LordSheo.Editor.UI;
+using Newtonsoft.Json;
 
 namespace LordSheo.Editor.Shortcuts
 {
 	public static class MenuQuickSearchShortcut
 	{
-		public static readonly List<string> recentConfirmedMenus = new();
+		private const string KEY_RECENT_MENUS = "mqs_recent";
+		
+		public static readonly List<string> recentMenuSelections = new();
 		
 		public static string[] selectedMenus;
 		public static UnityEngine.Object[] selectedObjects;
+
+		private static bool initialised = false;
 
 		public static MenuQuickSearchSettings Settings => MenuQuickSearchSettings.Instance;
 
@@ -34,7 +39,17 @@ namespace LordSheo.Editor.Shortcuts
 
 				foreach (var menu in selectedMenus)
 				{
-					EditorApplication.ExecuteMenuItem(menu);
+					if (Settings.requiredConfirmationMenuMatches.Any(m => m.IsMatch(menu)))
+					{
+						EditorApplicationUtility.DisplayConfirmAction("MQS - Confirm Action", menu, () =>
+						{
+							EditorApplication.ExecuteMenuItem(menu);
+						});
+					}
+					else
+					{
+						EditorApplication.ExecuteMenuItem(menu);
+					}
 				}
 
 				var newWindows = Resources.FindObjectsOfTypeAll<EditorWindow>();
@@ -65,6 +80,21 @@ namespace LordSheo.Editor.Shortcuts
 		[Shortcut(ConstValues.NAMESPACE_PATH + "Menu/QuickSearch", KeyCode.Period, ShortcutModifiers.Control)]
 		public static void OnShortcut()
 		{
+			if (initialised == false)
+			{
+				initialised = true;
+
+				if (Settings.persistRecentMenuSelections)
+				{
+					var recentConfirmedMenuJson = EditorProject.prefs.GetString(KEY_RECENT_MENUS);
+
+					if (recentConfirmedMenuJson.IsNullOrEmpty() == false)
+					{
+						recentMenuSelections.AddRange(JsonConvert.DeserializeObject<List<string>>(recentConfirmedMenuJson));
+					}
+				}
+			}
+			
 			selectedObjects = Selection.objects;
 
 			var hardMenuRefs = MenuProxy.cachedMenuRoots
@@ -86,11 +116,11 @@ namespace LordSheo.Editor.Shortcuts
 				.Select(m => new GenericSelectorItem<StringSearch>(m.path, m.path))
 				.ToList();
 
-			if (recentConfirmedMenus.Count > 0)
+			if (recentMenuSelections.Count > 0)
 			{
-				for (int i = recentConfirmedMenus.Count - 1; i >= 0; i--)
+				for (int i = recentMenuSelections.Count - 1; i >= 0; i--)
 				{
-					var recentConfirmedMenu = recentConfirmedMenus[i];
+					var recentConfirmedMenu = recentMenuSelections[i];
 					var recentConfirmMenuDisplayName = "Recent/" + recentConfirmedMenu.Split("/").Last();
 					var recentConfirmedMenuItem = new GenericSelectorItem<StringSearch>(recentConfirmMenuDisplayName, recentConfirmedMenu);
 					
@@ -107,6 +137,13 @@ namespace LordSheo.Editor.Shortcuts
 			menu.SelectionConfirmed += OnSelectionConfirmed;
 		}
 
+		[MenuItem(ConstValues.NAMESPACE_PATH + "/MenuQuickSearch/Clear Recent Menu Selections")]
+		public static void ClearRecentMenuSelections()
+		{
+			recentMenuSelections.Clear();
+			SaveRecentMenuSelections();
+		}
+		
 		public static void OnSelectionConfirmed(IEnumerable<StringSearch> selection)
 		{
 			// NOTE: Have to execute outside the scope of the popup
@@ -116,24 +153,34 @@ namespace LordSheo.Editor.Shortcuts
 
 			if (Settings.maxRecentMenuLength == 0)
 			{
-				recentConfirmedMenus.Clear();
+				recentMenuSelections.Clear();
 				return;
 			}
 			
 			foreach (var selected in selectedMenus)
 			{
-				recentConfirmedMenus.Remove(selected);
-				recentConfirmedMenus.Insert(0, selected);
+				recentMenuSelections.Remove(selected);
+				recentMenuSelections.Insert(0, selected);
 			}
 
-			if (Settings.maxRecentMenuLength < 0)
+			// If less than zero, allow unlimited entries.
+			if (Settings.maxRecentMenuLength > 0)
 			{
-				return;
+				while (recentMenuSelections.Count > Settings.maxRecentMenuLength)
+				{
+					recentMenuSelections.RemoveAt(recentMenuSelections.Count - 1);
+				}
 			}
-			
-			while (recentConfirmedMenus.Count > Settings.maxRecentMenuLength)
+
+			SaveRecentMenuSelections();
+		}
+
+		private static void SaveRecentMenuSelections()
+		{
+			if (Settings.persistRecentMenuSelections)
 			{
-				recentConfirmedMenus.RemoveAt(recentConfirmedMenus.Count - 1);
+				EditorProject.prefs.SetString(KEY_RECENT_MENUS, JsonConvert.SerializeObject(recentMenuSelections));
+				EditorProject.prefs.Save();
 			}
 		}
 	}

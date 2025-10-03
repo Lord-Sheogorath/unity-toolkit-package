@@ -1,3 +1,4 @@
+#if LORD_SHEO_ODIN_ENABLED
 using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector.Editor;
@@ -38,3 +39,4 @@ namespace LordSheo.Editor
         }
     }
 }
+#endif

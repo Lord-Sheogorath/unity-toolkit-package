@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if LORD_SHEO_ODIN_ENABLED
+using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector.Editor;
 using UnityEngine;
@@ -12,3 +13,4 @@ namespace LordSheo.Editor.Windows.TSP
 		IEnumerable<GenericSelectorItem<System.Action>> GetContextActions();
 	}
 }
+#endif

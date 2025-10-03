@@ -1,3 +1,4 @@
+#if LORD_SHEO_ODIN_ENABLED
 using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -53,3 +54,4 @@ namespace LordSheo.Editor.Windows.TSP
 		}
 	}
 }
+#endif

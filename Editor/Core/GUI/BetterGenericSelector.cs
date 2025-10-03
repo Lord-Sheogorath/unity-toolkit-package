@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if LORD_SHEO_ODIN_ENABLED
+using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEditor;
@@ -360,3 +361,4 @@ namespace LordSheo.Editor.UI
 		}
 	}
 }
+#endif

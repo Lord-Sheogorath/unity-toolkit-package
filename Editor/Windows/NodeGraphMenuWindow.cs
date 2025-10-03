@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if LORD_SHEO_ODIN_ENABLED
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
@@ -479,3 +480,4 @@ namespace LordSheo.Editor.Windows
 		}
 	}
 }
+#endif

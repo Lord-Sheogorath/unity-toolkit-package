@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if LORD_SHEO_ODIN_ENABLED
+using System.Collections.Generic;
 using UnityEditor;
 
 namespace LordSheo.Editor.Windows.TSP
@@ -79,3 +80,4 @@ namespace LordSheo.Editor.Windows.TSP
 		}
 	}
 }
+#endif

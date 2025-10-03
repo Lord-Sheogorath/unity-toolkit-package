@@ -1,3 +1,4 @@
+#if LORD_SHEO_ODIN_ENABLED
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -185,3 +186,4 @@ namespace LordSheo.Editor.Shortcuts
 		}
 	}
 }
+#endif

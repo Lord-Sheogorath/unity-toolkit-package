@@ -1,7 +1,9 @@
-﻿using System;
-using System.IO;
-using System.Text.RegularExpressions;
+﻿#if LORD_SHEO_ODIN_ENABLED
 using Sirenix.OdinInspector;
+#endif
+
+using System;
+using System.Text.RegularExpressions;
 
 namespace LordSheo.Editor
 {

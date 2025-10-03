@@ -1,3 +1,4 @@
+#if LORD_SHEO_ODIN_ENABLED
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -379,3 +380,4 @@ namespace LordSheo.Editor.Windows.TSP
 		}
 	}
 }
+#endif

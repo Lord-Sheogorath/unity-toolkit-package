@@ -1,11 +1,11 @@
-﻿using System;
+﻿#if LORD_SHEO_ODIN_ENABLED
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
-using UnityEditor.Playables;
 using UnityEngine;
 
 namespace LordSheo.Editor.Windows.TSP
@@ -156,3 +156,4 @@ namespace LordSheo.Editor.Windows.TSP
 		}
 	}
 }
+#endif

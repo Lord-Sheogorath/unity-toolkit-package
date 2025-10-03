@@ -1,5 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿#if LORD_SHEO_ODIN_ENABLED
 using Sirenix.OdinInspector;
+#endif
+
+using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
 

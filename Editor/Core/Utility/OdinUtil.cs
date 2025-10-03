@@ -1,4 +1,5 @@
-﻿using Sirenix.OdinInspector.Editor;
+﻿#if LORD_SHEO_ODIN_ENABLED
+using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
@@ -75,3 +76,4 @@ namespace LordSheo.Editor.UI
 		}
 	}
 }
+#endif

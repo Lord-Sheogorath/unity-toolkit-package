@@ -7,9 +7,26 @@ namespace LordSheo
 {
     public class MonoGizmo : MonoBehaviour
     {
+        public bool onlyShowOnSelect;
         public Color color = Color.white;
 
         public void OnDrawGizmos()
+        {
+            if (onlyShowOnSelect == false)
+            {
+                Draw();
+            }
+        }
+
+        public void OnDrawGizmosSelected()
+        {
+            if (onlyShowOnSelect)
+            {
+                Draw();
+            }
+        }
+
+        protected void Draw()
         {
             var gizColor = Gizmos.color;
             Gizmos.color = color;
